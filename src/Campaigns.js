@@ -13,7 +13,11 @@ import {
 
 function Campaigns({ user }) {
   const [campaigns, setCampaigns] = useState([]);
-  const [newCampaign, setNewCampaign] = useState({ name: "", client: "" });
+  const [newCampaign, setNewCampaign] = useState({
+    name: "",
+    client: "",
+    status: "Planned",
+  });
   const [editing, setEditing] = useState(null);
 
   useEffect(() => {
@@ -33,20 +37,22 @@ function Campaigns({ user }) {
       createdBy: user.email,
       createdAt: new Date(),
     });
-    setNewCampaign({ name: "", client: "" });
+    setNewCampaign({ name: "", client: "", status: "Planned" });
   };
 
   const handleDelete = async (id) => {
     await deleteDoc(doc(db, "campaigns", id));
   };
 
-  const startEdit = (campaign) => setEditing(campaign);
+  const startEdit = (campaign) =>
+    setEditing({ ...campaign, status: campaign.status || "Planned" });
 
   const handleUpdate = async () => {
     if (!editing) return;
     await updateDoc(doc(db, "campaigns", editing.id), {
       name: editing.name,
       client: editing.client,
+      status: editing.status,
       updatedAt: new Date(),
     });
     setEditing(null);
@@ -74,6 +80,18 @@ function Campaigns({ user }) {
               : setNewCampaign({ ...newCampaign, client: e.target.value })
           }
         />
+        <select
+          value={editing ? editing.status : newCampaign.status}
+          onChange={e =>
+            editing
+              ? setEditing({ ...editing, status: e.target.value })
+              : setNewCampaign({ ...newCampaign, status: e.target.value })
+          }
+        >
+          <option value="Planned">Planned</option>
+          <option value="Active">Active</option>
+          <option value="Completed">Completed</option>
+        </select>
         {editing ? (
           <>
             <button onClick={handleUpdate}>Save</button>
@@ -86,7 +104,7 @@ function Campaigns({ user }) {
       <ul>
         {campaigns.map(c => (
           <li key={c.id}>
-            <b>{c.name}</b> (Client: {c.client})
+            <b>{c.name}</b> (Client: {c.client}) - Status: {c.status || "Planned"}
             <button onClick={() => startEdit(c)}>Edit</button>
             <button onClick={() => handleDelete(c.id)}>Delete</button>
           </li>
