@@ -31,20 +31,28 @@ export default function Clients() {
 
   const handleAdd = async () => {
     if (!newClient.name) return;
-    const clientRef = doc(collection(db, "clients"));
-    await setDoc(clientRef, {
-      name: newClient.name,
-      legalEntity: newClient.legalEntity,
-      taxNumber: newClient.taxNumber,
-    });
-    setClients((prev) => [...prev, { id: clientRef.id, ...newClient }]);
-    setNewClient({ name: "", legalEntity: "", taxNumber: "" });
+    try {
+      const clientRef = doc(collection(db, "clients"));
+      await setDoc(clientRef, {
+        name: newClient.name,
+        legalEntity: newClient.legalEntity,
+        taxNumber: newClient.taxNumber,
+      });
+      setClients((prev) => [...prev, { id: clientRef.id, ...newClient }]);
+      setNewClient({ name: "", legalEntity: "", taxNumber: "" });
+    } catch (err) {
+      alert("Failed to add client.");
+    }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Delete this client?")) {
-      await deleteDoc(doc(db, "clients", id));
-      setClients((prev) => prev.filter((c) => c.id !== id));
+      try {
+        await deleteDoc(doc(db, "clients", id));
+        setClients((prev) => prev.filter((c) => c.id !== id));
+      } catch (err) {
+        alert("Failed to delete client.");
+      }
     }
   };
 

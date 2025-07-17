@@ -29,11 +29,15 @@ export default function ChainEdit() {
       alert("Share cannot be negative");
       return;
     }
-    await updateDoc(doc(db, "chains", id), {
-      chainName: formData.chainName,
-      share: shareNum,
-    });
-    navigate("/inventory/chains");
+    try {
+      await updateDoc(doc(db, "chains", id), {
+        chainName: formData.chainName,
+        share: shareNum,
+      });
+      navigate("/inventory/chains");
+    } catch (err) {
+      alert("Failed to save chain.");
+    }
   };
 
   return (

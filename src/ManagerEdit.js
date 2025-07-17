@@ -24,11 +24,15 @@ export default function ManagerEdit() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await updateDoc(doc(db, "managers", id), {
-      name: formData.name,
-      lastName: formData.lastName,
-    });
-    navigate("/inventory/managers");
+    try {
+      await updateDoc(doc(db, "managers", id), {
+        name: formData.name,
+        lastName: formData.lastName,
+      });
+      navigate("/inventory/managers");
+    } catch (err) {
+      alert("Failed to save manager.");
+    }
   };
 
   return (

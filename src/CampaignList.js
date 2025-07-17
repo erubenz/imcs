@@ -98,8 +98,12 @@ export default function CampaignList({ filteredBy }) {
 
   const deleteCampaign = async (id) => {
     if (window.confirm("Delete this campaign?")) {
-      await deleteDoc(doc(db, "campaigns", id));
-      setCampaigns(prev => prev.filter(c => c.id !== id));
+      try {
+        await deleteDoc(doc(db, "campaigns", id));
+        setCampaigns(prev => prev.filter(c => c.id !== id));
+      } catch (err) {
+        alert("Failed to delete campaign.");
+      }
     }
   };
 

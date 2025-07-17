@@ -22,9 +22,13 @@ export const ensureUserDoc = async (user) => {
   const ref = doc(db, "users", user.uid);
   const snapshot = await getDoc(ref);
   if (!snapshot.exists()) {
-    await setDoc(ref, {
-      email: user.email,
-      role: "Viewer"
-    });
+    try {
+      await setDoc(ref, {
+        email: user.email,
+        role: "Viewer"
+      });
+    } catch (err) {
+      console.error("Failed to create user document", err);
+    }
   }
 };

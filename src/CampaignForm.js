@@ -195,9 +195,14 @@ export default function CampaignForm() {
         alert("Duplicate or missing client name");
         return;
       }
-      const clientRef = doc(collection(db, "clients"));
-      await setDoc(clientRef, { ...newClient, createdAt: Timestamp.now() });
-      clientId = clientRef.id;
+      try {
+        const clientRef = doc(collection(db, "clients"));
+        await setDoc(clientRef, { ...newClient, createdAt: Timestamp.now() });
+        clientId = clientRef.id;
+      } catch (err) {
+        alert("Failed to add new client.");
+        return;
+      }
     }
 
     // Get existing campaign (edit mode) to preserve createdAt
@@ -223,8 +228,12 @@ export default function CampaignForm() {
     };
 
     const campaignId = isEdit ? id : `C_${Date.now()}`;
-    await setDoc(doc(db, "campaigns", campaignId), payload);
-    navigate("/campaigns");
+    try {
+      await setDoc(doc(db, "campaigns", campaignId), payload);
+      navigate("/campaigns");
+    } catch (err) {
+      alert("Failed to save campaign.");
+    }
   };
 
   const handleChainAddOrUpdate = () => {
