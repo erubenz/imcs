@@ -56,9 +56,7 @@ export default function CampaignForm() {
     endDate: "",
     locationCount: 0,
     slotPrice: 0,
-    scheduleType: "uniform",
-    uniformSlots: 0,
-    weekdaySlots: {},
+    slotSchedule: { type: "uniform", slots: 0 },
     disabled: false,
   });
   const [editingChainIndex, setEditingChainIndex] = useState(null);
@@ -83,12 +81,38 @@ export default function CampaignForm() {
         const snap = await getDoc(ref);
         if (snap.exists()) {
           const data = snap.data();
+          const migratedChains = (data.chains || []).map((c) => {
+            if (c.slotSchedule) {
+              return {
+                chainId: c.chainId,
+                startDate: c.startDate,
+                endDate: c.endDate,
+                locationCount: c.locationCount,
+                slotPrice: c.slotPrice,
+                slotSchedule: c.slotSchedule,
+                disabled: c.disabled || false,
+              };
+            }
+            const slotSchedule = c.scheduleType === "weekday"
+              ? { type: "weekday", slots: c.weekdaySlots || {} }
+              : { type: "uniform", slots: c.uniformSlots || 0 };
+            return {
+              chainId: c.chainId,
+              startDate: c.startDate,
+              endDate: c.endDate,
+              locationCount: c.locationCount,
+              slotPrice: c.slotPrice,
+              slotSchedule,
+              disabled: c.disabled || false,
+            };
+          });
+
           setFormData({
             campaignName: data.campaignName || "",
             clientId: data.clientId || "",
             managerId: data.managerId || "",
             status: data.status || "Planned",
-            chains: data.chains || [],
+            chains: migratedChains,
           });
         }
       };
@@ -162,10 +186,15 @@ export default function CampaignForm() {
   };
 
   const handleChainAddOrUpdate = () => {
-    const schedule = newChain.scheduleType === "uniform"
-      ? { type: "uniform", slots: newChain.uniformSlots }
-      : { type: "weekday", slots: newChain.weekdaySlots };
-    const entry = { ...newChain, slotSchedule: schedule };
+    const entry = {
+      chainId: newChain.chainId,
+      startDate: newChain.startDate,
+      endDate: newChain.endDate,
+      locationCount: newChain.locationCount,
+      slotPrice: newChain.slotPrice,
+      slotSchedule: newChain.slotSchedule,
+      disabled: newChain.disabled,
+    };
     const updated = [...formData.chains];
     if (editingChainIndex !== null) {
       updated[editingChainIndex] = entry;
@@ -180,9 +209,7 @@ export default function CampaignForm() {
       endDate: "",
       locationCount: 0,
       slotPrice: 0,
-      scheduleType: "uniform",
-      uniformSlots: 0,
-      weekdaySlots: {},
+      slotSchedule: { type: "uniform", slots: 0 },
       disabled: false,
     });
   };
@@ -370,21 +397,34 @@ export default function CampaignForm() {
             <Select
               size="small"
               variant="outlined"
-              value={newChain.scheduleType}
-              onChange={(e) => setNewChain({ ...newChain, scheduleType: e.target.value })}
+              value={newChain.slotSchedule.type}
+              onChange={(e) =>
+                setNewChain({
+                  ...newChain,
+                  slotSchedule: { ...newChain.slotSchedule, type: e.target.value },
+                })
+              }
               sx={{ minWidth: 110 }}
             >
               <MenuItem value="uniform">Uniform</MenuItem>
               <MenuItem value="weekday">Weekday</MenuItem>
             </Select>
-            {newChain.scheduleType === "uniform" ? (
+            {newChain.slotSchedule.type === "uniform" ? (
               <TextField
                 label="Slots/Day"
                 type="number"
                 size="small"
                 variant="outlined"
-                value={newChain.uniformSlots}
-                onChange={(e) => setNewChain({ ...newChain, uniformSlots: parseInt(e.target.value) || 0 })}
+                value={newChain.slotSchedule.slots}
+                onChange={(e) =>
+                  setNewChain({
+                    ...newChain,
+                    slotSchedule: {
+                      type: "uniform",
+                      slots: parseInt(e.target.value) || 0,
+                    },
+                  })
+                }
                 sx={{ maxWidth: 100 }}
               />
             ) : (
@@ -396,11 +436,17 @@ export default function CampaignForm() {
                     type="number"
                     size="small"
                     variant="outlined"
-                    value={newChain.weekdaySlots[day] || ""}
+                    value={newChain.slotSchedule.slots[day] || ""}
                     onChange={(e) =>
                       setNewChain((prev) => ({
                         ...prev,
-                        weekdaySlots: { ...prev.weekdaySlots, [day]: parseInt(e.target.value) || 0 },
+                        slotSchedule: {
+                          type: "weekday",
+                          slots: {
+                            ...prev.slotSchedule.slots,
+                            [day]: parseInt(e.target.value) || 0,
+                          },
+                        },
                       }))
                     }
                     sx={{ width: 80 }}
@@ -468,8 +514,8 @@ export default function CampaignForm() {
             <TableCell>{ch.locationCount}</TableCell>
             <TableCell>{ch.slotPrice}</TableCell>
             <TableCell>
-              {ch.scheduleType === "uniform"
-                ? `Uniform: ${ch.uniformSlots} slots/day`
+              {ch.slotSchedule?.type === "uniform"
+                ? `Uniform: ${ch.slotSchedule.slots} slots/day`
                 : "Weekday-based"}
             </TableCell>
             <TableCell>{slots}</TableCell>
