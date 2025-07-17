@@ -32,16 +32,26 @@ function Campaigns({ user }) {
 
   const handleAdd = async () => {
     if (!newCampaign.name || !newCampaign.client) return;
-    await addDoc(collection(db, "campaigns"), {
-      ...newCampaign,
-      createdBy: user.email,
-      createdAt: new Date(),
-    });
-    setNewCampaign({ name: "", client: "", status: "Planned" });
+    try {
+      await addDoc(collection(db, "campaigns"), {
+        ...newCampaign,
+        createdBy: user.email,
+        createdAt: new Date(),
+      });
+      setNewCampaign({ name: "", client: "", status: "Planned" });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add campaign.");
+    }
   };
 
   const handleDelete = async (id) => {
-    await deleteDoc(doc(db, "campaigns", id));
+    try {
+      await deleteDoc(doc(db, "campaigns", id));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete campaign.");
+    }
   };
 
   const startEdit = (campaign) =>
@@ -49,13 +59,18 @@ function Campaigns({ user }) {
 
   const handleUpdate = async () => {
     if (!editing) return;
-    await updateDoc(doc(db, "campaigns", editing.id), {
-      name: editing.name,
-      client: editing.client,
-      status: editing.status,
-      updatedAt: new Date(),
-    });
-    setEditing(null);
+    try {
+      await updateDoc(doc(db, "campaigns", editing.id), {
+        name: editing.name,
+        client: editing.client,
+        status: editing.status,
+        updatedAt: new Date(),
+      });
+      setEditing(null);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update campaign.");
+    }
   };
 
   return (

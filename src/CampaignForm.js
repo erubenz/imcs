@@ -126,39 +126,44 @@ export default function CampaignForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let clientId = formData.clientId;
+    try {
+      let clientId = formData.clientId;
 
-    // Handle New Client
-    if (useNewClient) {
-      if (!newClient.name || clients.find((c) => c.name === newClient.name)) {
-        alert("Duplicate or missing client name");
-        return;
+      // Handle New Client
+      if (useNewClient) {
+        if (!newClient.name || clients.find((c) => c.name === newClient.name)) {
+          alert("Duplicate or missing client name");
+          return;
+        }
+        const clientRef = doc(collection(db, "clients"));
+        await setDoc(clientRef, { ...newClient, createdAt: Timestamp.now() });
+        clientId = clientRef.id;
       }
-      const clientRef = doc(collection(db, "clients"));
-      await setDoc(clientRef, { ...newClient, createdAt: Timestamp.now() });
-      clientId = clientRef.id;
-    }
 
-    // Get existing campaign (edit mode) to preserve createdAt
-    let createdAt = Timestamp.now();
-    if (isEdit) {
-      const existing = await getDoc(doc(db, "campaigns", id));
-      if (existing.exists() && existing.data().createdAt) {
-        createdAt = existing.data().createdAt;
+      // Get existing campaign (edit mode) to preserve createdAt
+      let createdAt = Timestamp.now();
+      if (isEdit) {
+        const existing = await getDoc(doc(db, "campaigns", id));
+        if (existing.exists() && existing.data().createdAt) {
+          createdAt = existing.data().createdAt;
+        }
       }
+
+      const payload = {
+        ...formData,
+        clientId,
+        createdAt,
+        budget: campaignBudget,
+        updatedAt: Timestamp.now(), // Always set on save, but not shown outside details!
+      };
+
+      const campaignId = isEdit ? id : `C_${Date.now()}`;
+      await setDoc(doc(db, "campaigns", campaignId), payload);
+      navigate("/campaigns");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save campaign.");
     }
-
-    const payload = {
-      ...formData,
-      clientId,
-      createdAt,
-      budget: campaignBudget,
-      updatedAt: Timestamp.now(), // Always set on save, but not shown outside details!
-    };
-
-    const campaignId = isEdit ? id : `C_${Date.now()}`;
-    await setDoc(doc(db, "campaigns", campaignId), payload);
-    navigate("/campaigns");
   };
 
   const handleChainAddOrUpdate = () => {
