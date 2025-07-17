@@ -1,7 +1,6 @@
 // Refactored Login.js
 import React, { useState } from "react";
-import { auth, ensureUserDoc } from "./firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { useAuth } from "./context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -18,13 +17,13 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     try {
-      const userCred = await signInWithEmailAndPassword(auth, email, password);
-      await ensureUserDoc(userCred.user);
+      await login(email, password);
       navigate("/");
     } catch (err) {
       setError("Login failed. Please check your credentials.");
