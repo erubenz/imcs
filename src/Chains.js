@@ -25,17 +25,18 @@ export default function Chains() {
   const navigate = useNavigate();
   
   const handleAdd = async () => {
-    if (!newChain.chainName || !newChain.share) return;
-    if (parseFloat(newChain.share) <= 0) {
-      alert("Share must be a positive number");
+    if (!newChain.chainName || newChain.share === "") return;
+    const shareNum = parseFloat(newChain.share);
+    if (isNaN(shareNum) || shareNum < 0) {
+      alert("Share cannot be negative");
       return;
     }
     const chainRef = doc(collection(db, "chains"));
     await setDoc(chainRef, {
       chainName: newChain.chainName,
-      share: newChain.share,
+      share: shareNum,
     });
-    setChains(prev => [...prev, { id: chainRef.id, ...newChain }]);
+    setChains(prev => [...prev, { id: chainRef.id, chainName: newChain.chainName, share: shareNum }]);
     setNewChain({ chainName: "", share: "" });
   };
 
