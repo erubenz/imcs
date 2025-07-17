@@ -17,6 +17,7 @@ import {
 import { Edit, Delete } from "@mui/icons-material";
 import PageWrapper from "./components/common/PageWrapper";
 import SectionTitle from "./components/common/SectionTitle";
+import { calculateTotalSlots } from "./utils";
 
 export default function CampaignList({ filteredBy }) {
   const [campaigns, setCampaigns] = useState([]);
@@ -66,6 +67,13 @@ export default function CampaignList({ filteredBy }) {
         const minStart = startDates.sort()[0] || "";
         const maxEnd = endDates.sort().reverse()[0] || "";
 
+        const created =
+          data.createdAt?.toDate
+            ? data.createdAt.toDate().toISOString().slice(0, 10)
+            : typeof data.createdAt === "string"
+            ? data.createdAt.slice(0, 10)
+            : "";
+
         result.push({
           id: doc.id,
           name: data.campaignName || "",
@@ -78,7 +86,7 @@ export default function CampaignList({ filteredBy }) {
           chains: data.chains || [],
           chainCount: chainCount,
           budget: data.budget || 0,
-          created: typeof data.createdAt === "string" ? data.createdAt.slice(0, 10) : "",
+          created,
         });
       });
 
@@ -184,13 +192,7 @@ const renderByChain = () => {
           {records.map((r, i) => {
             const start = r.chain.startDate;
             const end = r.chain.endDate;
-            const days = (new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24) + 1;
-            let totalSlots = 0;
-            if (r.chain.slotSchedule?.type === "uniform") {
-              totalSlots = r.chain.slotSchedule.slots * days;
-            } else if (r.chain.slotSchedule?.type === "weekday") {
-              totalSlots = Object.values(r.chain.slotSchedule.slots || {}).reduce((a, b) => a + b, 0) * days / 7;
-            }
+            const totalSlots = calculateTotalSlots(start, end, r.chain.slotSchedule);
             const budget = totalSlots * r.chain.slotPrice * r.chain.locationCount;
             return (
               <TableRow key={i}>

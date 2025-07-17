@@ -10,6 +10,7 @@ import ChainEdit from "./ChainEdit";
 import ManagerEdit from "./ManagerEdit";
 import Users from "./Users";
 import Clients from "./Clients";
+import ClientEdit from "./ClientEdit";
 import Login from "./Login";
 import CampaignDetail from "./CampaignDetail";
 import NotFound from "./NotFound";
@@ -35,6 +36,7 @@ function App() {
     <Route path="inventory/managers/:id/edit" element={<ManagerEdit />} />
     <Route path="inventory/users" element={<Users />} />
     <Route path="clients" element={<Clients />} />
+    <Route path="clients/:id/edit" element={<ClientEdit />} />
     <Route path="login" element={<Login />} />
   </Route>
   <Route path="*" element={<NotFound />} />

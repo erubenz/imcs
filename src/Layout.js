@@ -27,9 +27,7 @@ import {
   AccountTree,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { auth } from "./firebase";
-import { signOut } from "firebase/auth";
-import { useAuthState } from "react-firebase-hooks/auth";
+import { useAuth } from "./context/AuthContext";
 import { Login, Logout } from "@mui/icons-material";
 
 const drawerWidth = 240;
@@ -40,12 +38,12 @@ export default function Layout() {
   const location = useLocation();
   
   const navigate = useNavigate();
-const [user] = useAuthState(auth);
+  const { user, logout } = useAuth();
 
-const handleLogout = async () => {
-  await signOut(auth);
-  navigate("/login");
-};
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
 
   return (
     <Box sx={{ display: "flex" }}>
