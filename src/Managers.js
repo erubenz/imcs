@@ -32,19 +32,27 @@ export default function Managers() {
 
   const handleAdd = async () => {
     if (!newManager.name || !newManager.lastName) return;
-    const managerRef = doc(collection(db, "managers"));
-    await setDoc(managerRef, {
-      name: newManager.name,
-      lastName: newManager.lastName,
-    });
-    setManagers(prev => [...prev, { id: managerRef.id, ...newManager }]);
-    setNewManager({ name: "", lastName: "" });
+    try {
+      const managerRef = doc(collection(db, "managers"));
+      await setDoc(managerRef, {
+        name: newManager.name,
+        lastName: newManager.lastName,
+      });
+      setManagers(prev => [...prev, { id: managerRef.id, ...newManager }]);
+      setNewManager({ name: "", lastName: "" });
+    } catch (err) {
+      alert("Failed to add manager.");
+    }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Delete this manager?")) {
-      await deleteDoc(doc(db, "managers", id));
-      setManagers(managers.filter((m) => m.id !== id));
+      try {
+        await deleteDoc(doc(db, "managers", id));
+        setManagers(managers.filter((m) => m.id !== id));
+      } catch (err) {
+        alert("Failed to delete manager.");
+      }
     }
   };
 

@@ -31,13 +31,17 @@ export default function Chains() {
       alert("Share cannot be negative");
       return;
     }
-    const chainRef = doc(collection(db, "chains"));
-    await setDoc(chainRef, {
-      chainName: newChain.chainName,
-      share: shareNum,
-    });
-    setChains(prev => [...prev, { id: chainRef.id, chainName: newChain.chainName, share: shareNum }]);
-    setNewChain({ chainName: "", share: "" });
+    try {
+      const chainRef = doc(collection(db, "chains"));
+      await setDoc(chainRef, {
+        chainName: newChain.chainName,
+        share: shareNum,
+      });
+      setChains(prev => [...prev, { id: chainRef.id, chainName: newChain.chainName, share: shareNum }]);
+      setNewChain({ chainName: "", share: "" });
+    } catch (err) {
+      alert("Failed to add chain.");
+    }
   };
 
   useEffect(() => {
@@ -48,8 +52,12 @@ export default function Chains() {
 
   const handleDelete = async (id) => {
     if (window.confirm("Delete this chain?")) {
-      await deleteDoc(doc(db, "chains", id));
-      setChains(chains.filter((c) => c.id !== id));
+      try {
+        await deleteDoc(doc(db, "chains", id));
+        setChains(chains.filter((c) => c.id !== id));
+      } catch (err) {
+        alert("Failed to delete chain.");
+      }
     }
   };
 

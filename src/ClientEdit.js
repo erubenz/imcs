@@ -28,12 +28,16 @@ export default function ClientEdit() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await updateDoc(doc(db, "clients", id), {
-      name: formData.name,
-      legalEntity: formData.legalEntity,
-      taxNumber: formData.taxNumber,
-    });
-    navigate("/clients");
+    try {
+      await updateDoc(doc(db, "clients", id), {
+        name: formData.name,
+        legalEntity: formData.legalEntity,
+        taxNumber: formData.taxNumber,
+      });
+      navigate("/clients");
+    } catch (err) {
+      alert("Failed to save client.");
+    }
   };
 
   return (
