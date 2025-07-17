@@ -1,12 +1,13 @@
 import React from "react";
-import PageWrapper from "./components/common/PageWrapper";
-import SectionTitle from "./components/common/SectionTitle";
+import { Box, Typography } from "@mui/material";
 
 export default function NotFound() {
   return (
-    <PageWrapper>
-      <SectionTitle>Page Not Found</SectionTitle>
-      <p>The page you are looking for does not exist.</p>
-    </PageWrapper>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        Page Not Found
+      </Typography>
+      <Typography>The page you are looking for does not exist.</Typography>
+    </Box>
   );
 }
