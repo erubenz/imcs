@@ -4,9 +4,9 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import {
   Drawer,
   List,
-  ListItem,
   ListItemText,
   ListItemIcon,
+  ListItemButton,
   Collapse,
   IconButton,
   Toolbar,
@@ -78,16 +78,15 @@ export default function Layout() {
       >
         <Toolbar />
         <List>
-          <ListItem button onClick={() => setInventoryOpen(!inventoryOpen)}>
+          <ListItemButton onClick={() => setInventoryOpen(!inventoryOpen)}>
             <ListItemIcon><Inventory /></ListItemIcon>
             <ListItemText primary="Inventory Management" />
             {inventoryOpen ? <ExpandLess /> : <ExpandMore />}
-          </ListItem>
+          </ListItemButton>
 
           <Collapse in={inventoryOpen} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              <ListItem
-                button
+              <ListItemButton
                 component={Link}
                 to="/inventory/chains"
                 selected={location.pathname === "/inventory/chains"}
@@ -95,9 +94,8 @@ export default function Layout() {
               >
                 <ListItemIcon><Store /></ListItemIcon>
                 <ListItemText primary="Chains" />
-              </ListItem>
-              <ListItem
-                button
+              </ListItemButton>
+              <ListItemButton
                 component={Link}
                 to="/inventory/managers"
                 selected={location.pathname === "/inventory/managers"}
@@ -105,9 +103,8 @@ export default function Layout() {
               >
                 <ListItemIcon><ManageAccounts /></ListItemIcon>
                 <ListItemText primary="Managers" />
-              </ListItem>
-              <ListItem
-                button
+              </ListItemButton>
+              <ListItemButton
                 component={Link}
                 to="/inventory/users"
                 selected={location.pathname === "/inventory/users"}
@@ -115,47 +112,44 @@ export default function Layout() {
               >
                 <ListItemIcon><Person /></ListItemIcon>
                 <ListItemText primary="Users" />
-              </ListItem>
+              </ListItemButton>
             </List>
           </Collapse>
 
-          <ListItem
-            button
+          <ListItemButton
             component={Link}
             to="/clients"
             selected={location.pathname === "/clients"}
           >
             <ListItemIcon><Group /></ListItemIcon>
             <ListItemText primary="Clients" />
-          </ListItem>
+          </ListItemButton>
 
-          <ListItem
-            button
+          <ListItemButton
             component={Link}
             to="/campaigns"
             selected={location.pathname.startsWith("/campaigns")}
           >
             <ListItemIcon><AccountTree /></ListItemIcon>
             <ListItemText primary="Campaigns" />
-          </ListItem>
+          </ListItemButton>
 
           {!user && (
-            <ListItem
-              button
+            <ListItemButton
               component={Link}
               to="/login"
               selected={location.pathname === "/login"}
             >
               <ListItemIcon><Login /></ListItemIcon>
               <ListItemText primary="Login" />
-            </ListItem>
+            </ListItemButton>
           )}
 
           {user && (
-            <ListItem button onClick={handleLogout}>
+            <ListItemButton onClick={handleLogout}>
               <ListItemIcon><Logout /></ListItemIcon>
               <ListItemText primary="Logout" />
-            </ListItem>
+            </ListItemButton>
           )}
         </List>
 
