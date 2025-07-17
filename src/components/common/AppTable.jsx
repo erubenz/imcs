@@ -1,4 +1,5 @@
 import { Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
+import { Box } from "@mui/material";
 
 export default function AppTable({ columns, data, renderActions }) {
   return (
@@ -25,6 +26,6 @@ export default function AppTable({ columns, data, renderActions }) {
         ))}
       </TableBody>
     </Table>
-	</box>
+	</Box>
   );
 }

@@ -24,7 +24,7 @@ export default function Chains() {
   const [newChain, setNewChain] = useState({ chainName: "", share: "" });
   const navigate = useNavigate();
   
-  const handleAdd = async () => {      // <--- AND THIS BLOCK
+  const handleAdd = async () => {
     if (!newChain.chainName || !newChain.share) return;
     const chainRef = doc(collection(db, "chains"));
     await setDoc(chainRef, {
