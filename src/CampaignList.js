@@ -66,6 +66,13 @@ export default function CampaignList({ filteredBy }) {
         const minStart = startDates.sort()[0] || "";
         const maxEnd = endDates.sort().reverse()[0] || "";
 
+        const created =
+          data.createdAt?.toDate
+            ? data.createdAt.toDate().toISOString().slice(0, 10)
+            : typeof data.createdAt === "string"
+            ? data.createdAt.slice(0, 10)
+            : "";
+
         result.push({
           id: doc.id,
           name: data.campaignName || "",
@@ -78,7 +85,7 @@ export default function CampaignList({ filteredBy }) {
           chains: data.chains || [],
           chainCount: chainCount,
           budget: data.budget || 0,
-          created: typeof data.createdAt === "string" ? data.createdAt.slice(0, 10) : "",
+          created,
         });
       });
 
