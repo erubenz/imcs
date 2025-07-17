@@ -140,25 +140,26 @@ const handleLogout = async () => {
             <ListItemIcon><AccountTree /></ListItemIcon>
             <ListItemText primary="Campaigns" />
           </ListItem>
-        </List>
-		{!user && (
-  <ListItem
-    button
-    component={Link}
-    to="/login"
-    selected={location.pathname === "/login"}
-  >
-    <ListItemIcon><Login /></ListItemIcon>
-    <ListItemText primary="Login" />
-  </ListItem>
-)}
 
-{user && (
-  <ListItem button onClick={handleLogout}>
-    <ListItemIcon><Logout /></ListItemIcon>
-    <ListItemText primary="Logout" />
-  </ListItem>
-)}
+          {!user && (
+            <ListItem
+              button
+              component={Link}
+              to="/login"
+              selected={location.pathname === "/login"}
+            >
+              <ListItemIcon><Login /></ListItemIcon>
+              <ListItemText primary="Login" />
+            </ListItem>
+          )}
+
+          {user && (
+            <ListItem button onClick={handleLogout}>
+              <ListItemIcon><Logout /></ListItemIcon>
+              <ListItemText primary="Logout" />
+            </ListItem>
+          )}
+        </List>
 
       </Drawer>
 
