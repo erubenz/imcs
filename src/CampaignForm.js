@@ -162,6 +162,28 @@ export default function CampaignForm() {
   };
 
   const handleChainAddOrUpdate = () => {
+    if (!newChain.chainId) return;
+    if (!newChain.startDate || !newChain.endDate) return;
+    if (new Date(newChain.endDate) < new Date(newChain.startDate)) {
+      alert("End date must be after start date");
+      return;
+    }
+    if (newChain.locationCount <= 0 || newChain.slotPrice <= 0) {
+      alert("Location count and slot price must be positive numbers");
+      return;
+    }
+    if (newChain.scheduleType === "uniform" && newChain.uniformSlots <= 0) {
+      alert("Slots per day must be positive");
+      return;
+    }
+    if (newChain.scheduleType === "weekday") {
+      const values = Object.values(newChain.weekdaySlots || {});
+      if (!values.some(v => v > 0)) {
+        alert("At least one weekday slot must be positive");
+        return;
+      }
+    }
+
     const schedule = newChain.scheduleType === "uniform"
       ? { type: "uniform", slots: newChain.uniformSlots }
       : { type: "weekday", slots: newChain.weekdaySlots };
@@ -354,6 +376,7 @@ export default function CampaignForm() {
               type="number"
               size="small"
               variant="outlined"
+              inputProps={{ min: 0 }}
               value={newChain.locationCount}
               onChange={(e) => setNewChain({ ...newChain, locationCount: parseInt(e.target.value) || 0 })}
               sx={{ maxWidth: 90 }}
@@ -363,6 +386,7 @@ export default function CampaignForm() {
               type="number"
               size="small"
               variant="outlined"
+              inputProps={{ min: 0 }}
               value={newChain.slotPrice}
               onChange={(e) => setNewChain({ ...newChain, slotPrice: parseInt(e.target.value) || 0 })}
               sx={{ maxWidth: 100 }}
@@ -383,6 +407,7 @@ export default function CampaignForm() {
                 type="number"
                 size="small"
                 variant="outlined"
+                inputProps={{ min: 0 }}
                 value={newChain.uniformSlots}
                 onChange={(e) => setNewChain({ ...newChain, uniformSlots: parseInt(e.target.value) || 0 })}
                 sx={{ maxWidth: 100 }}
@@ -396,6 +421,7 @@ export default function CampaignForm() {
                     type="number"
                     size="small"
                     variant="outlined"
+                    inputProps={{ min: 0 }}
                     value={newChain.weekdaySlots[day] || ""}
                     onChange={(e) =>
                       setNewChain((prev) => ({
@@ -421,11 +447,11 @@ export default function CampaignForm() {
 
         {/* ADDED CHAINS TABLE */}
         {formData.chains.length > 0 && (
-          <Box sx={{ mb: 3 }}>
+          <Box sx={{ mb: 3, overflowX: 'auto' }}>
   <Typography variant="subtitle1" sx={{ mb: 1 }}>
     Added Chains
   </Typography>
-  <Table size="small" sx={{ minWidth: 1100, width: "100%", tableLayout: "fixed" }}>
+  <Table size="small" aria-label="added chains" sx={{ minWidth: 1100, width: "100%", tableLayout: "fixed" }}>
     <TableHead>
       <TableRow>
         <TableCell sx={{ width: 160 }}>Chain</TableCell>

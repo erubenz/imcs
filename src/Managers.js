@@ -83,7 +83,7 @@ export default function Managers() {
       </Stack>
 
       <Box sx={{ width: '100%', overflowX: "auto" }}>
-        <Table size="small" sx={{ minWidth: 700 }}>
+        <Table size="small" aria-label="managers table" sx={{ minWidth: 700 }}>
           <TableHead>
             <TableRow>
               <TableCell sx={tableCellSx}>ID</TableCell>

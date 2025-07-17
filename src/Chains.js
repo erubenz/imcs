@@ -26,6 +26,10 @@ export default function Chains() {
   
   const handleAdd = async () => {
     if (!newChain.chainName || !newChain.share) return;
+    if (parseFloat(newChain.share) <= 0) {
+      alert("Share must be a positive number");
+      return;
+    }
     const chainRef = doc(collection(db, "chains"));
     await setDoc(chainRef, {
       chainName: newChain.chainName,
@@ -71,6 +75,7 @@ export default function Chains() {
           label="Share (%)"
           size="small"
           type="number"
+          inputProps={{ min: 0 }}
           value={newChain.share}
           onChange={e => setNewChain({ ...newChain, share: e.target.value })}
         />
@@ -83,7 +88,7 @@ export default function Chains() {
         </Button>
       </Stack>
       <Box sx={{ width: '100%', overflowX: "auto" }}>
-        <Table size="small" sx={{ minWidth: 700 }}>
+        <Table size="small" aria-label="chains table" sx={{ minWidth: 700 }}>
           <TableHead>
             <TableRow>
               <TableCell sx={tableCellSx}>ID</TableCell>

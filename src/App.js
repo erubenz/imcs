@@ -12,6 +12,7 @@ import Users from "./Users";
 import Clients from "./Clients";
 import Login from "./Login";
 import CampaignDetail from "./CampaignDetail";
+import NotFound from "./NotFound";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
     <Route path="clients" element={<Clients />} />
     <Route path="login" element={<Login />} />
   </Route>
+  <Route path="*" element={<NotFound />} />
 </Routes>
 
   );

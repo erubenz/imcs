@@ -1,10 +1,10 @@
 import { Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
 import { Box } from "@mui/material";
 
-export default function AppTable({ columns, data, renderActions }) {
+export default function AppTable({ columns, data, renderActions, ariaLabel }) {
   return (
     <Box sx={{ overflowX: 'auto' }}>
-	<Table size="small">
+        <Table size="small" aria-label={ariaLabel}>
       <TableHead>
         <TableRow>
           {columns.map((col) => (
