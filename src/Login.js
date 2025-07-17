@@ -1,7 +1,7 @@
 // Refactored Login.js
 import React, { useState } from "react";
 import { useAuth } from "./context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -17,14 +17,18 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
+
+  if (user) {
+    return <Navigate to="/campaigns" replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     try {
       await login(email, password);
-      navigate("/");
+      navigate("/campaigns");
     } catch (err) {
       setError("Login failed. Please check your credentials.");
     }
