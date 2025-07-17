@@ -24,7 +24,6 @@ function App() {
       <Route path=":id" element={<CampaignDetail />} />
       <Route path="client/:clientId" element={<CampaignList filteredBy="client" />} />
       <Route path="manager/:managerId" element={<CampaignList filteredBy="manager" />} />
-	  <Route path="campaign/:id" element={<CampaignDetail />} />
     </Route>
 
     <Route path="inventory/chains" element={<Chains />} />
