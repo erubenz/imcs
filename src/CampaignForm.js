@@ -54,11 +54,59 @@ export default function CampaignForm() {
     chainId: "",
     startDate: "",
     endDate: "",
-    locationCount: 0,
-    slotPrice: 0,
-    slotSchedule: { type: "uniform", slots: 0 },
+    locationCount: "",
+    slotPrice: "",
+    slotSchedule: { type: "uniform", slots: "" },
     disabled: false,
   });
+  const [chainErrors, setChainErrors] = useState({
+    locationCount: "",
+    slotPrice: "",
+    uniformSlots: "",
+    weekdaySlots: {},
+  });
+
+  const updateNumberField = (field, value, isFloat = false) => {
+    const num = isFloat ? parseFloat(value) : Number(value);
+    let msg = "";
+    if (value === "" || isNaN(num) || num <= 0 || (!isFloat && !Number.isInteger(num))) {
+      msg = `Enter a positive ${isFloat ? "number" : "integer"}`;
+    }
+    setChainErrors((prev) => ({ ...prev, [field]: msg }));
+    setNewChain((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const updateUniformSlots = (value) => {
+    const num = Number(value);
+    let msg = "";
+    if (value === "" || isNaN(num) || num <= 0 || !Number.isInteger(num)) {
+      msg = "Enter a positive integer";
+    }
+    setChainErrors((prev) => ({ ...prev, uniformSlots: msg }));
+    setNewChain((prev) => ({
+      ...prev,
+      slotSchedule: { type: "uniform", slots: value },
+    }));
+  };
+
+  const updateWeekdaySlot = (day, value) => {
+    const num = Number(value);
+    let msg = "";
+    if (value === "" || isNaN(num) || num <= 0 || !Number.isInteger(num)) {
+      msg = "Positive integer";
+    }
+    setChainErrors((prev) => ({
+      ...prev,
+      weekdaySlots: { ...prev.weekdaySlots, [day]: msg },
+    }));
+    setNewChain((prev) => ({
+      ...prev,
+      slotSchedule: {
+        type: "weekday",
+        slots: { ...prev.slotSchedule.slots, [day]: value },
+      },
+    }));
+  };
   const [editingChainIndex, setEditingChainIndex] = useState(null);
   const [campaignBudget, setCampaignBudget] = useState(0);
 
@@ -126,7 +174,11 @@ export default function CampaignForm() {
     for (let chain of formData.chains) {
       if (chain.disabled) continue;
       const slots = calculateTotalSlots(chain.startDate, chain.endDate, chain.slotSchedule);
-      total += slots * chain.slotPrice * chain.locationCount;
+      const price = parseFloat(chain.slotPrice);
+      const locations = Number(chain.locationCount);
+      if (!isNaN(slots) && !isNaN(price) && !isNaN(locations)) {
+        total += slots * price * locations;
+      }
     }
     setCampaignBudget(total);
   }, [formData.chains]);
@@ -176,36 +228,43 @@ export default function CampaignForm() {
   };
 
   const handleChainAddOrUpdate = () => {
-    // VALIDATION (from codex branch)
     if (!newChain.chainId) return;
     if (!newChain.startDate || !newChain.endDate) return;
     if (new Date(newChain.endDate) < new Date(newChain.startDate)) {
       alert("End date must be after start date");
       return;
     }
-    if (newChain.locationCount < 0 || newChain.slotPrice < 0) {
-      alert("Location count and slot price cannot be negative");
+
+    const hasErrors =
+      chainErrors.locationCount ||
+      chainErrors.slotPrice ||
+      chainErrors.uniformSlots ||
+      Object.values(chainErrors.weekdaySlots).some(Boolean);
+    if (hasErrors) {
+      alert("Please fix input errors before adding");
       return;
     }
-    if (newChain.slotSchedule.type === "uniform" && (!newChain.slotSchedule.slots || newChain.slotSchedule.slots <= 0)) {
-      alert("Slots per day must be positive");
-      return;
-    }
-    if (newChain.slotSchedule.type === "weekday") {
-      const values = Object.values(newChain.slotSchedule.slots || {});
-      if (!values.some(v => v > 0)) {
-        alert("At least one weekday slot must be positive");
-        return;
+
+    const locationCount = Number(newChain.locationCount);
+    const slotPrice = parseFloat(newChain.slotPrice);
+    let slotSchedule = newChain.slotSchedule;
+    if (slotSchedule.type === "uniform") {
+      slotSchedule = { type: "uniform", slots: Number(slotSchedule.slots) };
+    } else {
+      const parsed = {};
+      for (const [day, val] of Object.entries(slotSchedule.slots || {})) {
+        parsed[day] = Number(val);
       }
+      slotSchedule = { type: "weekday", slots: parsed };
     }
 
     const entry = {
       chainId: newChain.chainId,
       startDate: newChain.startDate,
       endDate: newChain.endDate,
-      locationCount: parseInt(newChain.locationCount, 10),
-      slotPrice: parseFloat(newChain.slotPrice),
-      slotSchedule: newChain.slotSchedule,
+      locationCount,
+      slotPrice,
+      slotSchedule,
       disabled: newChain.disabled,
     };
     const updated = [...formData.chains];
@@ -220,15 +279,34 @@ export default function CampaignForm() {
       chainId: "",
       startDate: "",
       endDate: "",
-      locationCount: 0,
-      slotPrice: 0,
-      slotSchedule: { type: "uniform", slots: 0 },
+      locationCount: "",
+      slotPrice: "",
+      slotSchedule: { type: "uniform", slots: "" },
       disabled: false,
     });
+    setChainErrors({ locationCount: "", slotPrice: "", uniformSlots: "", weekdaySlots: {} });
   };
 
   const editChain = (i) => {
-    setNewChain({ ...formData.chains[i] });
+    const ch = formData.chains[i];
+    const schedule =
+      ch.slotSchedule.type === "uniform"
+        ? { type: "uniform", slots: String(ch.slotSchedule.slots) }
+        : {
+            type: "weekday",
+            slots: Object.fromEntries(
+              Object.entries(ch.slotSchedule.slots || {}).map(([d, v]) => [d, String(v)])
+            ),
+          };
+    setNewChain({
+      chainId: ch.chainId,
+      startDate: ch.startDate,
+      endDate: ch.endDate,
+      locationCount: String(ch.locationCount),
+      slotPrice: String(ch.slotPrice),
+      slotSchedule: schedule,
+      disabled: ch.disabled,
+    });
     setEditingChainIndex(i);
   };
   const removeChain = (i) => {
@@ -396,9 +474,9 @@ export default function CampaignForm() {
               variant="outlined"
               inputProps={{ min: 0 }}
               value={newChain.locationCount}
-              onChange={e =>
-                setNewChain({ ...newChain, locationCount: e.target.value === "" ? 0 : parseInt(e.target.value, 10) })
-              }
+              onChange={(e) => updateNumberField("locationCount", e.target.value)}
+              error={!!chainErrors.locationCount}
+              helperText={chainErrors.locationCount}
               sx={{ maxWidth: 90 }}
             />
             <TextField
@@ -408,21 +486,23 @@ export default function CampaignForm() {
               variant="outlined"
               inputProps={{ min: 0 }}
               value={newChain.slotPrice}
-              onChange={e =>
-                setNewChain({ ...newChain, slotPrice: e.target.value === "" ? 0 : parseInt(e.target.value, 10) })
-              }
+              onChange={(e) => updateNumberField("slotPrice", e.target.value, true)}
+              error={!!chainErrors.slotPrice}
+              helperText={chainErrors.slotPrice}
               sx={{ maxWidth: 100 }}
             />
             <Select
               size="small"
               variant="outlined"
               value={newChain.slotSchedule.type}
-              onChange={(e) =>
-                setNewChain({
-                  ...newChain,
-                  slotSchedule: { ...newChain.slotSchedule, type: e.target.value },
-                })
-              }
+              onChange={(e) => {
+                const type = e.target.value;
+                setNewChain((prev) => ({
+                  ...prev,
+                  slotSchedule: { type, slots: type === "uniform" ? "" : {} },
+                }));
+                setChainErrors((prev) => ({ ...prev, uniformSlots: "", weekdaySlots: {} }));
+              }}
               sx={{ minWidth: 110 }}
             >
               <MenuItem value="uniform">Uniform</MenuItem>
@@ -436,15 +516,9 @@ export default function CampaignForm() {
                 variant="outlined"
                 inputProps={{ min: 0 }}
                 value={newChain.slotSchedule.slots}
-                onChange={(e) =>
-                  setNewChain({
-                    ...newChain,
-                    slotSchedule: {
-                      type: "uniform",
-                      slots: e.target.value === "" ? 0 : parseInt(e.target.value, 10)
-                    },
-                  })
-                }
+                onChange={(e) => updateUniformSlots(e.target.value)}
+                error={!!chainErrors.uniformSlots}
+                helperText={chainErrors.uniformSlots}
                 sx={{ maxWidth: 100 }}
               />
             ) : (
@@ -458,18 +532,9 @@ export default function CampaignForm() {
                     variant="outlined"
                     inputProps={{ min: 0 }}
                     value={newChain.slotSchedule.slots?.[day] || ""}
-                    onChange={e =>
-                      setNewChain((prev) => ({
-                        ...prev,
-                        slotSchedule: {
-                          type: "weekday",
-                          slots: {
-                            ...prev.slotSchedule.slots,
-                            [day]: e.target.value === "" ? 0 : parseInt(e.target.value, 10),
-                          },
-                        },
-                      }))
-                    }
+                    onChange={(e) => updateWeekdaySlot(day, e.target.value)}
+                    error={!!chainErrors.weekdaySlots[day]}
+                    helperText={chainErrors.weekdaySlots[day]}
                     sx={{ width: 80 }}
                   />
                 ))}
