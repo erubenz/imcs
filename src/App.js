@@ -14,6 +14,7 @@ import ClientEdit from "./ClientEdit";
 import Login from "./Login";
 import CampaignDetail from "./CampaignDetail";
 import NotFound from "./NotFound";
+import RequireRole from "./components/auth/RequireRole";
 
 function App() {
   return (
@@ -31,11 +32,46 @@ function App() {
           <Route path="manager/:managerId" element={<CampaignList filteredBy="manager" />} />
         </Route>
 
-        <Route path="inventory/chains" element={<Chains />} />
-        <Route path="inventory/chains/:id/edit" element={<ChainEdit />} />
-        <Route path="inventory/managers" element={<Managers />} />
-        <Route path="inventory/managers/:id/edit" element={<ManagerEdit />} />
-        <Route path="inventory/users" element={<Users />} />
+        <Route
+          path="inventory/chains"
+          element={
+            <RequireRole role="Admin">
+              <Chains />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="inventory/chains/:id/edit"
+          element={
+            <RequireRole role="Admin">
+              <ChainEdit />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="inventory/managers"
+          element={
+            <RequireRole role="Admin">
+              <Managers />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="inventory/managers/:id/edit"
+          element={
+            <RequireRole role="Admin">
+              <ManagerEdit />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="inventory/users"
+          element={
+            <RequireRole role="Admin">
+              <Users />
+            </RequireRole>
+          }
+        />
         <Route path="clients" element={<Clients />} />
         <Route path="clients/:id/edit" element={<ClientEdit />} />
       </Route>
