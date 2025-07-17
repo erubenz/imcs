@@ -494,13 +494,14 @@ export default function CampaignForm() {
 
         )}
 
-        <Typography variant="h6" sx={{ mt: 3 }}>
+        <Typography variant="h6" sx={{ mt: 3, mb: 3 }}>
           Total Budget: {campaignBudget.toLocaleString()} AMD
         </Typography>
 
-        <Button type="submit" variant="contained" sx={{ mt: 3, minWidth: 180 }}>
-          {isEdit ? "Save Changes" : "Create Campaign"}
-        </Button>
+        <Stack direction="row" spacing={2}>
+            <Button type="submit" variant="contained">Save</Button>
+            <Button variant="outlined" onClick={() => navigate("/inventory/chains")}>Cancel</Button>
+          </Stack>
       </Box>
     </PageWrapper>
   );

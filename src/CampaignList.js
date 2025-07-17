@@ -106,7 +106,7 @@ export default function CampaignList({ filteredBy }) {
 
 const renderGeneral = () => (
   <Box sx={{ width: '100%', overflowX: "auto" }}>
-    <Table size="small" sx={{ minWidth: 900 }}>
+    <Table size="small" sx={{ minWidth: 900, tableLayout: "fixed" }}>
       <TableHead>
         <TableRow>
           <TableCell sx={tableCellSx}>ID</TableCell>
@@ -165,7 +165,7 @@ const renderByChain = () => {
   return Object.entries(grouped).map(([chainName, records]) => (
     <Box key={chainName} sx={{ mb: 4, width: '100%', overflowX: "auto" }}>
       <Typography variant="h6">{chainName}</Typography>
-      <Table size="small" sx={{ minWidth: 900 }}>
+      <Table size="small" sx={{ minWidth: 900, tableLayout: "fixed" }}>
         <TableHead>
           <TableRow>
             <TableCell sx={tableCellSx}>ID</TableCell>
