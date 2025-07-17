@@ -24,13 +24,14 @@ export default function ChainEdit() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (parseFloat(formData.share) <= 0) {
-      alert("Share must be a positive number");
+    const shareNum = parseFloat(formData.share);
+    if (isNaN(shareNum) || shareNum < 0) {
+      alert("Share cannot be negative");
       return;
     }
     await updateDoc(doc(db, "chains", id), {
       chainName: formData.chainName,
-      share: formData.share,
+      share: shareNum,
     });
     navigate("/inventory/chains");
   };

@@ -159,6 +159,11 @@ export default function CampaignForm() {
 
     const payload = {
       ...formData,
+      chains: formData.chains.map(ch => ({
+        ...ch,
+        locationCount: parseInt(ch.locationCount, 10),
+        slotPrice: parseFloat(ch.slotPrice),
+      })),
       clientId,
       createdAt,
       budget: campaignBudget,
@@ -178,8 +183,8 @@ export default function CampaignForm() {
       alert("End date must be after start date");
       return;
     }
-    if (newChain.locationCount <= 0 || newChain.slotPrice <= 0) {
-      alert("Location count and slot price must be positive numbers");
+    if (newChain.locationCount < 0 || newChain.slotPrice < 0) {
+      alert("Location count and slot price cannot be negative");
       return;
     }
     if (newChain.slotSchedule.type === "uniform" && (!newChain.slotSchedule.slots || newChain.slotSchedule.slots <= 0)) {
@@ -198,8 +203,8 @@ export default function CampaignForm() {
       chainId: newChain.chainId,
       startDate: newChain.startDate,
       endDate: newChain.endDate,
-      locationCount: newChain.locationCount,
-      slotPrice: newChain.slotPrice,
+      locationCount: parseInt(newChain.locationCount, 10),
+      slotPrice: parseFloat(newChain.slotPrice),
       slotSchedule: newChain.slotSchedule,
       disabled: newChain.disabled,
     };
