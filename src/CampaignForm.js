@@ -500,7 +500,7 @@ export default function CampaignForm() {
 
         <Stack direction="row" spacing={2}>
             <Button type="submit" variant="contained">Save</Button>
-            <Button variant="outlined" onClick={() => navigate("/inventory/chains")}>Cancel</Button>
+            <Button variant="outlined" onClick={() => navigate("/campaigns")}>Cancel</Button>
           </Stack>
       </Box>
     </PageWrapper>
