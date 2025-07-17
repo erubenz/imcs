@@ -44,6 +44,13 @@ export default function CampaignDetail() {
 
   if (!campaign) return <p>Loading...</p>;
 
+  const created =
+    campaign.createdAt?.toDate
+      ? campaign.createdAt.toDate().toLocaleDateString()
+      : campaign.createdAt
+        ? new Date(campaign.createdAt).toLocaleDateString()
+        : "";
+
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: 20 }}>
       <h2>📛 {campaign.campaignName}</h2>
@@ -51,7 +58,7 @@ export default function CampaignDetail() {
       <p><b>Client:</b> {clientName}</p>
       <p><b>Manager:</b> {managerName}</p>
       <p><b>Status:</b> {campaign.status}</p>
-      <p><b>Created:</b> {campaign.createdAt?.toDate().toLocaleDateString()}</p>
+      <p><b>Created:</b> {created}</p>
       <p><b>Total Budget:</b> {(campaign.budget || 0).toLocaleString()} AMD</p>
 
       <hr />
