@@ -6,6 +6,8 @@ import CampaignList from "./CampaignList";
 import CampaignForm from "./CampaignForm";
 import Chains from "./Chains";
 import Managers from "./Managers";
+import ChainEdit from "./ChainEdit";
+import ManagerEdit from "./ManagerEdit";
 import Users from "./Users";
 import Clients from "./Clients";
 import Login from "./Login";
@@ -28,7 +30,9 @@ function App() {
     </Route>
 
     <Route path="inventory/chains" element={<Chains />} />
+    <Route path="inventory/chains/:id/edit" element={<ChainEdit />} />
     <Route path="inventory/managers" element={<Managers />} />
+    <Route path="inventory/managers/:id/edit" element={<ManagerEdit />} />
     <Route path="inventory/users" element={<Users />} />
     <Route path="clients" element={<Clients />} />
     <Route path="login" element={<Login />} />

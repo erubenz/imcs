@@ -100,7 +100,7 @@ export default function Managers() {
                 <TableCell sx={tableCellSx}>{m.lastName}</TableCell>
                 <TableCell sx={tableCellSx}>
                   <Stack direction="row" spacing={0}>
-                    <IconButton size="small" onClick={() => navigate(`/managers/${m.id}/edit`)}><Edit fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => navigate(`/inventory/managers/${m.id}/edit`)}><Edit fontSize="small" /></IconButton>
                     <IconButton size="small" onClick={() => handleDelete(m.id)}><Delete fontSize="small" /></IconButton>
                   </Stack>
                 </TableCell>
