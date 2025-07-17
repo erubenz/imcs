@@ -24,11 +24,16 @@ export default function ChainEdit() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await updateDoc(doc(db, "chains", id), {
-      chainName: formData.chainName,
-      share: formData.share,
-    });
-    navigate("/inventory/chains");
+    try {
+      await updateDoc(doc(db, "chains", id), {
+        chainName: formData.chainName,
+        share: formData.share,
+      });
+      navigate("/inventory/chains");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update chain.");
+    }
   };
 
   return (
