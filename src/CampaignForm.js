@@ -30,6 +30,7 @@ import {
 } from "@mui/material";
 import PageWrapper from "./components/common/PageWrapper";
 import SectionTitle from "./components/common/SectionTitle";
+import { calculateTotalSlots } from "./utils";
 
 export default function CampaignForm() {
   const navigate = useNavigate();
@@ -125,22 +126,7 @@ export default function CampaignForm() {
     let total = 0;
     for (let chain of formData.chains) {
       if (chain.disabled) continue;
-      const start = new Date(chain.startDate);
-      const end = new Date(chain.endDate);
-      const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-      let slots = 0;
-      if (chain.slotSchedule?.type === "uniform") {
-        slots = chain.slotSchedule.slots * days;
-      } else if (chain.slotSchedule?.type === "weekday") {
-        const weekdayCounts = Array(7).fill(0);
-        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-          weekdayCounts[d.getDay()]++;
-        }
-        slots = Object.entries(chain.slotSchedule.slots || {}).reduce((sum, [day, count]) => {
-          const idx = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(day);
-          return sum + (count || 0) * weekdayCounts[idx];
-        }, 0);
-      }
+      const slots = calculateTotalSlots(chain.startDate, chain.endDate, chain.slotSchedule);
       total += slots * chain.slotPrice * chain.locationCount;
     }
     setCampaignBudget(total);
@@ -488,22 +474,7 @@ export default function CampaignForm() {
     <TableBody>
       {formData.chains.map((ch, i) => {
         // ...slots/budget calculation (unchanged)
-        const start = new Date(ch.startDate);
-        const end = new Date(ch.endDate);
-        const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-        let slots = 0;
-        if (ch.slotSchedule?.type === "uniform") {
-          slots = ch.slotSchedule.slots * days;
-        } else if (ch.slotSchedule?.type === "weekday") {
-          const weekdayCounts = Array(7).fill(0);
-          for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-            weekdayCounts[d.getDay()]++;
-          }
-          slots = Object.entries(ch.slotSchedule.slots || {}).reduce((sum, [day, count]) => {
-            const idx = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(day);
-            return sum + (count || 0) * weekdayCounts[idx];
-          }, 0);
-        }
+        const slots = calculateTotalSlots(ch.startDate, ch.endDate, ch.slotSchedule);
         const budget = slots * ch.slotPrice * ch.locationCount;
 
         return (

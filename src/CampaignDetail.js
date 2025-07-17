@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { doc, getDoc, getDocs, collection } from "firebase/firestore";
 import { db } from "./firebase";
+import { calculateTotalSlots } from "./utils";
 
 export default function CampaignDetail() {
   const { id } = useParams();
@@ -57,24 +58,7 @@ export default function CampaignDetail() {
       <h3>📦 Chains</h3>
       <ul>
         {campaign.chains.map((c, i) => {
-          const start = new Date(c.startDate);
-          const end = new Date(c.endDate);
-          const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-          let totalSlots = 0;
-
-          if (c.slotSchedule?.type === "uniform") {
-            totalSlots = c.slotSchedule.slots * days;
-          } else if (c.slotSchedule?.type === "weekday") {
-            const weekdayCounts = {};
-            for (let j = 0; j < 7; j++) weekdayCounts[j] = 0;
-            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-              weekdayCounts[d.getDay()]++;
-            }
-            totalSlots = Object.entries(c.slotSchedule.slots).reduce((sum, [day, slots]) => {
-              const idx = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"].indexOf(day);
-              return sum + (slots || 0) * weekdayCounts[idx];
-            }, 0);
-          }
+          const totalSlots = calculateTotalSlots(c.startDate, c.endDate, c.slotSchedule);
 
           const budget = totalSlots * c.slotPrice * c.locationCount;
 
