@@ -14,7 +14,9 @@ import {
   Box,
   Button,
   Checkbox,
+  FormControl,
   FormControlLabel,
+  FormHelperText,
   MenuItem,
   Select,
   Stack,
@@ -60,11 +62,43 @@ export default function CampaignForm() {
     disabled: false,
   });
   const [chainErrors, setChainErrors] = useState({
+    chainId: "",
+    startDate: "",
+    endDate: "",
     locationCount: "",
     slotPrice: "",
     uniformSlots: "",
     weekdaySlots: {},
   });
+
+  const updateDateField = (field, value) => {
+    let msg = value ? "" : "Required";
+    const other = field === "startDate" ? newChain.endDate : newChain.startDate;
+    if (
+      field === "endDate" &&
+      value &&
+      other &&
+      new Date(value) < new Date(other)
+    ) {
+      msg = "After start date";
+    }
+    if (
+      field === "startDate" &&
+      value &&
+      other &&
+      new Date(other) < new Date(value)
+    ) {
+      msg = "Before end date";
+    }
+    setChainErrors((prev) => ({ ...prev, [field]: msg }));
+    setNewChain((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const updateChainId = (value) => {
+    const msg = value ? "" : "Required";
+    setChainErrors((prev) => ({ ...prev, chainId: msg }));
+    setNewChain((prev) => ({ ...prev, chainId: value }));
+  };
 
   const updateNumberField = (field, value, isFloat = false) => {
     const num = isFloat ? parseFloat(value) : Number(value);
@@ -109,6 +143,7 @@ export default function CampaignForm() {
   };
   const [editingChainIndex, setEditingChainIndex] = useState(null);
   const [campaignBudget, setCampaignBudget] = useState(0);
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     const fetchRefs = async () => {
@@ -187,12 +222,13 @@ export default function CampaignForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError("");
     let clientId = formData.clientId;
 
     // Handle New Client
     if (useNewClient) {
       if (!newClient.name || clients.find((c) => c.name === newClient.name)) {
-        alert("Duplicate or missing client name");
+        setSubmitError("Duplicate or missing client name");
         return;
       }
       try {
@@ -200,7 +236,24 @@ export default function CampaignForm() {
         await setDoc(clientRef, { ...newClient, createdAt: Timestamp.now() });
         clientId = clientRef.id;
       } catch (err) {
-        alert("Failed to add new client.");
+        setSubmitError("Failed to add new client.");
+        return;
+      }
+    }
+
+    if (!formData.campaignName || !clientId || !formData.managerId) {
+      setSubmitError("Please fill all required fields");
+      return;
+    }
+
+    if (formData.chains.length === 0) {
+      setSubmitError("Add at least one chain");
+      return;
+    }
+
+    for (const ch of formData.chains) {
+      if (!ch.startDate || !ch.endDate || new Date(ch.endDate) < new Date(ch.startDate)) {
+        setSubmitError("Invalid chain date ranges");
         return;
       }
     }
@@ -232,25 +285,33 @@ export default function CampaignForm() {
       await setDoc(doc(db, "campaigns", campaignId), payload);
       navigate("/campaigns");
     } catch (err) {
-      alert("Failed to save campaign.");
+      setSubmitError("Failed to save campaign.");
     }
   };
 
   const handleChainAddOrUpdate = () => {
-    if (!newChain.chainId) return;
-    if (!newChain.startDate || !newChain.endDate) return;
-    if (new Date(newChain.endDate) < new Date(newChain.startDate)) {
-      alert("End date must be after start date");
-      return;
+    const newErr = {
+      chainId: newChain.chainId ? "" : "Required",
+      startDate: newChain.startDate ? "" : "Required",
+      endDate: newChain.endDate ? "" : "Required",
+    };
+    if (
+      newChain.startDate &&
+      newChain.endDate &&
+      new Date(newChain.endDate) < new Date(newChain.startDate)
+    ) {
+      newErr.endDate = "After start date";
     }
-
     const hasErrors =
+      newErr.chainId ||
+      newErr.startDate ||
+      newErr.endDate ||
       chainErrors.locationCount ||
       chainErrors.slotPrice ||
       chainErrors.uniformSlots ||
       Object.values(chainErrors.weekdaySlots).some(Boolean);
     if (hasErrors) {
-      alert("Please fix input errors before adding");
+      setChainErrors((prev) => ({ ...prev, ...newErr }));
       return;
     }
 
@@ -293,7 +354,15 @@ export default function CampaignForm() {
       slotSchedule: { type: "uniform", slots: "" },
       disabled: false,
     });
-    setChainErrors({ locationCount: "", slotPrice: "", uniformSlots: "", weekdaySlots: {} });
+    setChainErrors({
+      chainId: "",
+      startDate: "",
+      endDate: "",
+      locationCount: "",
+      slotPrice: "",
+      uniformSlots: "",
+      weekdaySlots: {},
+    });
   };
 
   const editChain = (i) => {
@@ -443,19 +512,20 @@ export default function CampaignForm() {
         <Typography variant="h6" sx={{ mt: 4, mb: 1 }}>Chain Allocation</Typography>
         <Paper sx={{ background: "#f9f9f9", p: 2, borderRadius: 2, mb: 3, maxWidth: 980 }}>
           <Stack direction="row" alignItems="center" flexWrap="wrap" rowGap={2} columnGap={2}>
-            <Select
-              size="small"
-              variant="outlined"
-              value={newChain.chainId}
-              onChange={(e) => setNewChain({ ...newChain, chainId: e.target.value })}
-              displayEmpty
-              sx={{ minWidth: 160 }}
-            >
-              <MenuItem disabled value="">Select Chain</MenuItem>
-              {chains.map((c) => (
-                <MenuItem key={c.id} value={c.id}>{c.chainName}</MenuItem>
-              ))}
-            </Select>
+            <FormControl error={!!chainErrors.chainId} sx={{ minWidth: 160 }} size="small">
+              <Select
+                variant="outlined"
+                value={newChain.chainId}
+                onChange={(e) => updateChainId(e.target.value)}
+                displayEmpty
+              >
+                <MenuItem disabled value="">Select Chain</MenuItem>
+                {chains.map((c) => (
+                  <MenuItem key={c.id} value={c.id}>{c.chainName}</MenuItem>
+                ))}
+              </Select>
+              <FormHelperText>{chainErrors.chainId}</FormHelperText>
+            </FormControl>
             <TextField
               label="Start Date"
               type="date"
@@ -463,7 +533,9 @@ export default function CampaignForm() {
               variant="outlined"
               InputLabelProps={{ shrink: true }}
               value={newChain.startDate}
-              onChange={(e) => setNewChain({ ...newChain, startDate: e.target.value })}
+              onChange={(e) => updateDateField("startDate", e.target.value)}
+              error={!!chainErrors.startDate}
+              helperText={chainErrors.startDate}
               sx={{ minWidth: 120 }}
             />
             <TextField
@@ -473,7 +545,9 @@ export default function CampaignForm() {
               variant="outlined"
               InputLabelProps={{ shrink: true }}
               value={newChain.endDate}
-              onChange={(e) => setNewChain({ ...newChain, endDate: e.target.value })}
+              onChange={(e) => updateDateField("endDate", e.target.value)}
+              error={!!chainErrors.endDate}
+              helperText={chainErrors.endDate}
               sx={{ minWidth: 120 }}
             />
             <TextField
@@ -622,6 +696,11 @@ export default function CampaignForm() {
         <Typography variant="h6" sx={{ mt: 3, mb: 3 }}>
           Total Budget: {campaignBudget.toLocaleString()} AMD
         </Typography>
+        {submitError && (
+          <Typography color="error" sx={{ mb: 2 }}>
+            {submitError}
+          </Typography>
+        )}
 
         <Stack direction="row" spacing={2}>
           <Button type="submit" variant="contained">Save</Button>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { db } from "./firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { Button, Stack, TextField } from "@mui/material";
+import { Button, Stack, TextField, Typography } from "@mui/material";
 import PageWrapper from "./components/common/PageWrapper";
 import SectionTitle from "./components/common/SectionTitle";
 
@@ -10,6 +10,8 @@ export default function ChainEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ chainName: "", share: "" });
+  const [shareError, setShareError] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -26,9 +28,11 @@ export default function ChainEdit() {
     e.preventDefault();
     const shareNum = parseFloat(formData.share);
     if (isNaN(shareNum) || shareNum < 0) {
-      alert("Share cannot be negative");
+      setShareError("Share cannot be negative");
       return;
     }
+    setShareError("");
+    setSubmitError("");
     try {
       await updateDoc(doc(db, "chains", id), {
         chainName: formData.chainName,
@@ -36,7 +40,7 @@ export default function ChainEdit() {
       });
       navigate("/inventory/chains");
     } catch (err) {
-      alert("Failed to save chain.");
+      setSubmitError("Failed to save chain.");
     }
   };
 
@@ -60,7 +64,12 @@ export default function ChainEdit() {
             value={formData.share}
             onChange={(e) => setFormData({ ...formData, share: e.target.value })}
             required
+            error={!!shareError}
+            helperText={shareError}
           />
+          {submitError && (
+            <Typography color="error">{submitError}</Typography>
+          )}
           <Stack direction="row" spacing={2}>
             <Button type="submit" variant="contained">Save</Button>
             <Button variant="outlined" onClick={() => navigate("/inventory/chains")}>Cancel</Button>

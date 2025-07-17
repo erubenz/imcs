@@ -22,15 +22,19 @@ import SectionTitle from "./components/common/SectionTitle";
 export default function Chains() {
   const [chains, setChains] = useState([]);
   const [newChain, setNewChain] = useState({ chainName: "", share: "" });
+  const [shareError, setShareError] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const navigate = useNavigate();
   
   const handleAdd = async () => {
     if (!newChain.chainName || newChain.share === "") return;
     const shareNum = parseFloat(newChain.share);
     if (isNaN(shareNum) || shareNum < 0) {
-      alert("Share cannot be negative");
+      setShareError("Share cannot be negative");
       return;
     }
+    setShareError("");
+    setSubmitError("");
     try {
       const chainRef = doc(collection(db, "chains"));
       await setDoc(chainRef, {
@@ -40,7 +44,7 @@ export default function Chains() {
       setChains(prev => [...prev, { id: chainRef.id, chainName: newChain.chainName, share: shareNum }]);
       setNewChain({ chainName: "", share: "" });
     } catch (err) {
-      alert("Failed to add chain.");
+      setSubmitError("Failed to add chain.");
     }
   };
 
@@ -56,7 +60,7 @@ export default function Chains() {
         await deleteDoc(doc(db, "chains", id));
         setChains(chains.filter((c) => c.id !== id));
       } catch (err) {
-        alert("Failed to delete chain.");
+        setSubmitError("Failed to delete chain.");
       }
     }
   };
@@ -87,6 +91,8 @@ export default function Chains() {
           inputProps={{ min: 0 }}
           value={newChain.share}
           onChange={e => setNewChain({ ...newChain, share: e.target.value })}
+          error={!!shareError}
+          helperText={shareError}
         />
         <Button
           variant="contained"
@@ -95,6 +101,11 @@ export default function Chains() {
         >
           Add
         </Button>
+        {submitError && (
+          <Typography color="error" sx={{ ml: 2 }}>
+            {submitError}
+          </Typography>
+        )}
       </Stack>
       <Box sx={{ width: '100%', overflowX: "auto" }}>
         <Table size="small" aria-label="chains table" sx={{ minWidth: 700 }}>
