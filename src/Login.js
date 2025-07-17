@@ -8,7 +8,6 @@ import {
   TextField,
   Typography,
   Alert,
-  Paper,
 } from "@mui/material";
 import PageWrapper from "./components/common/PageWrapper";
 
@@ -35,9 +34,8 @@ export default function Login() {
   };
 
   return (
-    <PageWrapper>
-      <Paper elevation={2} sx={{ maxWidth: 400, mx: "auto", p: 4 }}>
-        <Typography variant="h5" gutterBottom>Login</Typography>
+    <PageWrapper maxWidth={400} elevation={2} sx={{ p: 4 }}>
+      <Typography variant="h5" gutterBottom>Login</Typography>
 
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
@@ -68,7 +66,6 @@ export default function Login() {
             Login
           </Button>
         </Box>
-      </Paper>
     </PageWrapper>
   );
 }
