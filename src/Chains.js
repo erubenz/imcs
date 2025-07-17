@@ -100,7 +100,7 @@ export default function Chains() {
                 <TableCell sx={tableCellSx}>{chain.share}</TableCell>
                 <TableCell sx={tableCellSx}>
                   <Stack direction="row" spacing={0}>
-                    <IconButton size="small" onClick={() => navigate(`/chains/${chain.id}/edit`)}><Edit fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => navigate(`/inventory/chains/${chain.id}/edit`)}><Edit fontSize="small" /></IconButton>
                     <IconButton size="small" onClick={() => handleDelete(chain.id)}><Delete fontSize="small" /></IconButton>
                   </Stack>
                 </TableCell>
