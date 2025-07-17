@@ -1,167 +1,114 @@
-// src/Chains.js
-import React, { useState, useEffect } from "react";
-import {
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  onSnapshot
-} from "firebase/firestore";
+import React, { useEffect, useState } from "react";
 import { db } from "./firebase";
+import { collection, getDocs, doc, setDoc, deleteDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Button,
+  IconButton,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Stack,
+  Typography,
+  TextField,
+} from "@mui/material";
+import { Edit, Delete } from "@mui/icons-material";
+import PageWrapper from "./components/common/PageWrapper";
+import SectionTitle from "./components/common/SectionTitle";
 
 export default function Chains() {
   const [chains, setChains] = useState([]);
-  const [newChain, setNewChain] = useState({ chainName: "", sharePercent: "" });
-  const [editingId, setEditingId] = useState(null);
-  const [editChain, setEditChain] = useState({ chainName: "", sharePercent: "" });
+  const [newChain, setNewChain] = useState({ chainName: "", share: "" });
+  const navigate = useNavigate();
+  
+  const handleAdd = async () => {      // <--- AND THIS BLOCK
+    if (!newChain.chainName || !newChain.share) return;
+    const chainRef = doc(collection(db, "chains"));
+    await setDoc(chainRef, {
+      chainName: newChain.chainName,
+      share: newChain.share,
+    });
+    setChains(prev => [...prev, { id: chainRef.id, ...newChain }]);
+    setNewChain({ chainName: "", share: "" });
+  };
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "chains"), (snapshot) => {
-      const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setChains(list);
+    getDocs(collection(db, "chains")).then(snapshot => {
+      setChains(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
-    return () => unsub();
   }, []);
-
-  const handleAdd = async (e) => {
-  e.preventDefault();
-
-  const { chainName, sharePercent } = newChain;
-  const share = parseFloat(sharePercent);
-
-  if (!chainName || isNaN(share)) {
-    alert("Please enter valid chain name and share percent.");
-    return;
-  }
-
-  if (chains.some(c => c.chainName.toLowerCase() === chainName.toLowerCase())) {
-    alert("This chain already exists.");
-    return;
-  }
-
-  try {
-    await addDoc(collection(db, "chains"), {
-      chainName,
-      sharePercent: share
-    });
-    setNewChain({ chainName: "", sharePercent: "" });
-  } catch (err) {
-    console.error("Add failed", err);
-  }
-};
-
 
   const handleDelete = async (id) => {
     if (window.confirm("Delete this chain?")) {
       await deleteDoc(doc(db, "chains", id));
+      setChains(chains.filter((c) => c.id !== id));
     }
   };
 
-  const handleEdit = async (id) => {
-    const share = parseFloat(editChain.sharePercent);
-    if (!editChain.chainName || isNaN(share)) {
-      alert("Please enter valid name and percent.");
-      return;
-    }
-    await updateDoc(doc(db, "chains", id), {
-      chainName: editChain.chainName,
-      sharePercent: share
-    });
-    setEditingId(null);
-    setEditChain({ chainName: "", sharePercent: "" });
+  const tableCellSx = {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: 120,
+    fontSize: 13,
+    p: 1,
   };
 
   return (
-    <div style={{ maxWidth: 700, margin: "0 auto", padding: 20 }}>
-      <h2>Chains</h2>
-      <form onSubmit={handleAdd} style={{ marginBottom: 20 }}>
-        <input
-          placeholder="Chain Name"
+    <PageWrapper type="wide">
+      <SectionTitle>Supermarket Chains</SectionTitle>
+	  <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+        <TextField
+          label="Chain Name"
+          size="small"
           value={newChain.chainName}
-          onChange={(e) =>
-            setNewChain({ ...newChain, chainName: e.target.value })
-          }
+          onChange={e => setNewChain({ ...newChain, chainName: e.target.value })}
         />
-        <input
-          placeholder="Share % (e.g. 0.35)"
-          value={newChain.sharePercent}
-          onChange={(e) =>
-            setNewChain({ ...newChain, sharePercent: e.target.value })
-          }
+        <TextField
+          label="Share (%)"
+          size="small"
           type="number"
-          step="0.01"
-          min="0"
-          max="1"
+          value={newChain.share}
+          onChange={e => setNewChain({ ...newChain, share: e.target.value })}
         />
-        <button type="submit">Add Chain</button>
-      </form>
-
-      <table border="1" width="100%" cellPadding="8">
-        <thead>
-          <tr>
-            <th>Chain Name</th>
-            <th>Share %</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {chains.map((c) => (
-            <tr key={c.id}>
-              <td>
-                {editingId === c.id ? (
-                  <input
-                    value={editChain.chainName}
-                    onChange={(e) =>
-                      setEditChain((prev) => ({ ...prev, chainName: e.target.value }))
-                    }
-                  />
-                ) : (
-                  c.chainName
-                )}
-              </td>
-              <td>
-                {editingId === c.id ? (
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editChain.sharePercent}
-                    onChange={(e) =>
-                      setEditChain((prev) => ({ ...prev, sharePercent: e.target.value }))
-                    }
-                  />
-                ) : (
-                  `${(c.sharePercent * 100).toFixed(1)}%`
-                )}
-              </td>
-              <td>
-                {editingId === c.id ? (
-                  <>
-                    <button onClick={() => handleEdit(c.id)}>Save</button>
-                    <button onClick={() => setEditingId(null)}>Cancel</button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => {
-                        setEditingId(c.id);
-                        setEditChain({
-                          chainName: c.chainName,
-                          sharePercent: c.sharePercent
-                        });
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button onClick={() => handleDelete(c.id)}>Delete</button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+        <Button
+          variant="contained"
+          onClick={handleAdd}
+          disabled={!newChain.chainName || !newChain.share}
+        >
+          Add
+        </Button>
+      </Stack>
+      <Box sx={{ width: '100%', overflowX: "auto" }}>
+        <Table size="small" sx={{ minWidth: 700 }}>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={tableCellSx}>ID</TableCell>
+              <TableCell sx={tableCellSx}>Name</TableCell>
+              <TableCell sx={tableCellSx}>Share (%)</TableCell>
+              <TableCell sx={tableCellSx}>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {chains.map((chain) => (
+              <TableRow key={chain.id}>
+                <TableCell sx={tableCellSx}>{chain.id}</TableCell>
+                <TableCell sx={tableCellSx}>{chain.chainName}</TableCell>
+                <TableCell sx={tableCellSx}>{chain.share}</TableCell>
+                <TableCell sx={tableCellSx}>
+                  <Stack direction="row" spacing={0}>
+                    <IconButton size="small" onClick={() => navigate(`/chains/${chain.id}/edit`)}><Edit fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => handleDelete(chain.id)}><Delete fontSize="small" /></IconButton>
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Box>
+    </PageWrapper>
   );
 }

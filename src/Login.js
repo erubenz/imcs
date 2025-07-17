@@ -1,9 +1,17 @@
-// src/Login.js
+// Refactored Login.js
 import React, { useState } from "react";
-import { auth } from "./firebase";
+import { auth, ensureUserDoc } from "./firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { ensureUserDoc } from "./firebase";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Alert,
+  Paper,
+} from "@mui/material";
+import PageWrapper from "./components/common/PageWrapper";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -12,45 +20,52 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const userCred = await signInWithEmailAndPassword(auth, email, password);
-    await ensureUserDoc(userCred.user); // ✅ ensure user doc in Firestore
-    navigate("/");
-  } catch (err) {
-    setError("Login failed. Please check your credentials.");
-  }
-};
+    e.preventDefault();
+    setError("");
+    try {
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
+      await ensureUserDoc(userCred.user);
+      navigate("/");
+    } catch (err) {
+      setError("Login failed. Please check your credentials.");
+    }
+  };
 
   return (
-    <div style={{ maxWidth: 400, margin: "auto", padding: 20 }}>
-      <h2>Login</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <input
+    <PageWrapper>
+      <Paper elevation={2} sx={{ maxWidth: 400, mx: "auto", p: 4 }}>
+        <Typography variant="h5" gutterBottom>Login</Typography>
+
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+        <Box component="form" onSubmit={handleSubmit}>
+          <TextField
+            label="Email"
             type="email"
-            placeholder="Email"
             value={email}
-            required
             onChange={(e) => setEmail(e.target.value)}
-            style={{ width: "100%", padding: 8, marginBottom: 10 }}
-          />
-        </div>
-        <div>
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
+            fullWidth
+            size="small"
+            margin="normal"
             required
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ width: "100%", padding: 8, marginBottom: 10 }}
           />
-        </div>
-        <button type="submit" style={{ padding: "8px 16px" }}>
-          Login
-        </button>
-      </form>
-    </div>
+
+          <TextField
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            fullWidth
+            size="small"
+            margin="normal"
+            required
+          />
+
+          <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
+            Login
+          </Button>
+        </Box>
+      </Paper>
+    </PageWrapper>
   );
 }

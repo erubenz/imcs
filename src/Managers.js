@@ -1,150 +1,114 @@
-// src/Managers.js
-import React, { useState, useEffect } from "react";
-import {
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  onSnapshot
-} from "firebase/firestore";
+import React, { useEffect, useState } from "react";
 import { db } from "./firebase";
+import { collection, getDocs, doc, setDoc, deleteDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Button,
+  IconButton,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Stack,
+  Typography,
+  TextField,
+} from "@mui/material";
+import { Edit, Delete } from "@mui/icons-material";
+import PageWrapper from "./components/common/PageWrapper";
+import SectionTitle from "./components/common/SectionTitle";
 
 export default function Managers() {
   const [managers, setManagers] = useState([]);
   const [newManager, setNewManager] = useState({ name: "", lastName: "" });
-  const [editingId, setEditingId] = useState(null);
-  const [editManager, setEditManager] = useState({ name: "", lastName: "" });
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "managers"), (snapshot) => {
-      const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setManagers(list);
+    getDocs(collection(db, "managers")).then(snapshot => {
+      setManagers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
-    return () => unsub();
   }, []);
 
-  const handleAdd = async (e) => {
-    e.preventDefault();
-    if (!newManager.name || !newManager.lastName) {
-      alert("Please enter both name and last name.");
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, "managers"), {
-        name: newManager.name.trim(),
-        lastName: newManager.lastName.trim(),
-      });
-      setNewManager({ name: "", lastName: "" });
-    } catch (err) {
-      console.error("Add failed", err);
-    }
+  const handleAdd = async () => {
+    if (!newManager.name || !newManager.lastName) return;
+    const managerRef = doc(collection(db, "managers"));
+    await setDoc(managerRef, {
+      name: newManager.name,
+      lastName: newManager.lastName,
+    });
+    setManagers(prev => [...prev, { id: managerRef.id, ...newManager }]);
+    setNewManager({ name: "", lastName: "" });
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Delete this manager?")) {
       await deleteDoc(doc(db, "managers", id));
+      setManagers(managers.filter((m) => m.id !== id));
     }
   };
 
-  const handleEdit = async (id) => {
-    if (!editManager.name || !editManager.lastName) {
-      alert("Please enter valid name and last name.");
-      return;
-    }
-    await updateDoc(doc(db, "managers", id), {
-      name: editManager.name.trim(),
-      lastName: editManager.lastName.trim(),
-    });
-    setEditingId(null);
-    setEditManager({ name: "", lastName: "" });
+  const tableCellSx = {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: 120,
+    fontSize: 13,
+    p: 1,
   };
 
   return (
-    <div style={{ maxWidth: 700, margin: "0 auto", padding: 20 }}>
-      <h2>Managers</h2>
-      <form onSubmit={handleAdd} style={{ marginBottom: 20 }}>
-        <input
-          placeholder="Name"
+    <PageWrapper type="wide">
+      <SectionTitle>Managers</SectionTitle>
+      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+        <TextField
+          label="Name"
+          size="small"
           value={newManager.name}
-          onChange={(e) =>
-            setNewManager({ ...newManager, name: e.target.value })
-          }
+          onChange={e => setNewManager({ ...newManager, name: e.target.value })}
         />
-        <input
-          placeholder="Last Name"
+        <TextField
+          label="Last Name"
+          size="small"
           value={newManager.lastName}
-          onChange={(e) =>
-            setNewManager({ ...newManager, lastName: e.target.value })
-          }
+          onChange={e => setNewManager({ ...newManager, lastName: e.target.value })}
         />
-        <button type="submit">Add Manager</button>
-      </form>
+        <Button
+          variant="contained"
+          onClick={handleAdd}
+          disabled={!newManager.name || !newManager.lastName}
+        >
+          Add
+        </Button>
+      </Stack>
 
-      <table border="1" width="100%" cellPadding="8">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Last Name</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {managers.map((m) => (
-            <tr key={m.id}>
-              <td>
-                {editingId === m.id ? (
-                  <input
-                    value={editManager.name}
-                    onChange={(e) =>
-                      setEditManager((prev) => ({ ...prev, name: e.target.value }))
-                    }
-                  />
-                ) : (
-                  m.name
-                )}
-              </td>
-              <td>
-                {editingId === m.id ? (
-                  <input
-                    value={editManager.lastName}
-                    onChange={(e) =>
-                      setEditManager((prev) => ({ ...prev, lastName: e.target.value }))
-                    }
-                  />
-                ) : (
-                  m.lastName
-                )}
-              </td>
-              <td>
-                {editingId === m.id ? (
-                  <>
-                    <button onClick={() => handleEdit(m.id)}>Save</button>
-                    <button onClick={() => setEditingId(null)}>Cancel</button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => {
-                        setEditingId(m.id);
-                        setEditManager({
-                          name: m.name,
-                          lastName: m.lastName
-                        });
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button onClick={() => handleDelete(m.id)}>Delete</button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+      <Box sx={{ width: '100%', overflowX: "auto" }}>
+        <Table size="small" sx={{ minWidth: 700 }}>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={tableCellSx}>ID</TableCell>
+              <TableCell sx={tableCellSx}>Name</TableCell>
+              <TableCell sx={tableCellSx}>Last Name</TableCell>
+              <TableCell sx={tableCellSx}>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {managers.map((m) => (
+              <TableRow key={m.id}>
+                <TableCell sx={tableCellSx}>{m.id}</TableCell>
+                <TableCell sx={tableCellSx}>{m.name}</TableCell>
+                <TableCell sx={tableCellSx}>{m.lastName}</TableCell>
+                <TableCell sx={tableCellSx}>
+                  <Stack direction="row" spacing={0}>
+                    <IconButton size="small" onClick={() => navigate(`/managers/${m.id}/edit`)}><Edit fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => handleDelete(m.id)}><Delete fontSize="small" /></IconButton>
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Box>
+    </PageWrapper>
   );
 }

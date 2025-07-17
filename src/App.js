@@ -9,22 +9,32 @@ import Managers from "./Managers";
 import Users from "./Users";
 import Clients from "./Clients";
 import Login from "./Login";
+import CampaignDetail from "./CampaignDetail";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Navigate to="/campaigns" />} />
-        <Route path="campaigns" element={<CampaignList />} />
-        <Route path="campaigns/new" element={<CampaignForm />} />
-        <Route path="campaigns/:id/edit" element={<CampaignForm />} />
-        <Route path="inventory/chains" element={<Chains />} />
-        <Route path="inventory/managers" element={<Managers />} />
-        <Route path="inventory/users" element={<Users />} />
-        <Route path="clients" element={<Clients />} />
-		<Route path="/login" element={<Login />} />
-      </Route>
-    </Routes>
+  <Route path="/" element={<Layout />}>
+    <Route index element={<Navigate to="/campaigns" />} />
+
+    <Route path="campaigns">
+      <Route index element={<CampaignList />} />
+      <Route path="new" element={<CampaignForm />} />
+      <Route path=":id/edit" element={<CampaignForm />} />
+      <Route path=":id" element={<CampaignDetail />} />
+      <Route path="client/:clientId" element={<CampaignList filteredBy="client" />} />
+      <Route path="manager/:managerId" element={<CampaignList filteredBy="manager" />} />
+	  <Route path="campaign/:id" element={<CampaignDetail />} />
+    </Route>
+
+    <Route path="inventory/chains" element={<Chains />} />
+    <Route path="inventory/managers" element={<Managers />} />
+    <Route path="inventory/users" element={<Users />} />
+    <Route path="clients" element={<Clients />} />
+    <Route path="login" element={<Login />} />
+  </Route>
+</Routes>
+
   );
 }
 
