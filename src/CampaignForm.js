@@ -8,7 +8,6 @@ import {
   setDoc,
   getDoc,
   Timestamp,
-  updateDoc,
 } from "firebase/firestore";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -172,6 +171,29 @@ export default function CampaignForm() {
   };
 
   const handleChainAddOrUpdate = () => {
+    // VALIDATION (from codex branch)
+    if (!newChain.chainId) return;
+    if (!newChain.startDate || !newChain.endDate) return;
+    if (new Date(newChain.endDate) < new Date(newChain.startDate)) {
+      alert("End date must be after start date");
+      return;
+    }
+    if (newChain.locationCount <= 0 || newChain.slotPrice <= 0) {
+      alert("Location count and slot price must be positive numbers");
+      return;
+    }
+    if (newChain.slotSchedule.type === "uniform" && (!newChain.slotSchedule.slots || newChain.slotSchedule.slots <= 0)) {
+      alert("Slots per day must be positive");
+      return;
+    }
+    if (newChain.slotSchedule.type === "weekday") {
+      const values = Object.values(newChain.slotSchedule.slots || {});
+      if (!values.some(v => v > 0)) {
+        alert("At least one weekday slot must be positive");
+        return;
+      }
+    }
+
     const entry = {
       chainId: newChain.chainId,
       startDate: newChain.startDate,
@@ -367,8 +389,11 @@ export default function CampaignForm() {
               type="number"
               size="small"
               variant="outlined"
+              inputProps={{ min: 0 }}
               value={newChain.locationCount}
-              onChange={(e) => setNewChain({ ...newChain, locationCount: parseInt(e.target.value) || 0 })}
+              onChange={e =>
+                setNewChain({ ...newChain, locationCount: e.target.value === "" ? 0 : parseInt(e.target.value, 10) })
+              }
               sx={{ maxWidth: 90 }}
             />
             <TextField
@@ -376,8 +401,11 @@ export default function CampaignForm() {
               type="number"
               size="small"
               variant="outlined"
+              inputProps={{ min: 0 }}
               value={newChain.slotPrice}
-              onChange={(e) => setNewChain({ ...newChain, slotPrice: parseInt(e.target.value) || 0 })}
+              onChange={e =>
+                setNewChain({ ...newChain, slotPrice: e.target.value === "" ? 0 : parseInt(e.target.value, 10) })
+              }
               sx={{ maxWidth: 100 }}
             />
             <Select
@@ -401,13 +429,14 @@ export default function CampaignForm() {
                 type="number"
                 size="small"
                 variant="outlined"
+                inputProps={{ min: 0 }}
                 value={newChain.slotSchedule.slots}
                 onChange={(e) =>
                   setNewChain({
                     ...newChain,
                     slotSchedule: {
                       type: "uniform",
-                      slots: parseInt(e.target.value) || 0,
+                      slots: e.target.value === "" ? 0 : parseInt(e.target.value, 10)
                     },
                   })
                 }
@@ -422,15 +451,16 @@ export default function CampaignForm() {
                     type="number"
                     size="small"
                     variant="outlined"
-                    value={newChain.slotSchedule.slots[day] || ""}
-                    onChange={(e) =>
+                    inputProps={{ min: 0 }}
+                    value={newChain.slotSchedule.slots?.[day] || ""}
+                    onChange={e =>
                       setNewChain((prev) => ({
                         ...prev,
                         slotSchedule: {
                           type: "weekday",
                           slots: {
                             ...prev.slotSchedule.slots,
-                            [day]: parseInt(e.target.value) || 0,
+                            [day]: e.target.value === "" ? 0 : parseInt(e.target.value, 10),
                           },
                         },
                       }))
@@ -453,62 +483,61 @@ export default function CampaignForm() {
 
         {/* ADDED CHAINS TABLE */}
         {formData.chains.length > 0 && (
-          <Box sx={{ mb: 3 }}>
-  <Typography variant="subtitle1" sx={{ mb: 1 }}>
-    Added Chains
-  </Typography>
-  <Table size="small" sx={{ minWidth: 1100, width: "100%", tableLayout: "fixed" }}>
-    <TableHead>
-      <TableRow>
-        <TableCell sx={{ width: 160 }}>Chain</TableCell>
-        <TableCell sx={{ width: 120 }}>Start</TableCell>
-        <TableCell sx={{ width: 120 }}>End</TableCell>
-        <TableCell sx={{ width: 90 }}>Locations</TableCell>
-        <TableCell sx={{ width: 100 }}>Slot Price</TableCell>
-        <TableCell sx={{ width: 100 }}>Schedule</TableCell>
-        <TableCell sx={{ width: 110 }}>Slots Total</TableCell>
-        <TableCell sx={{ width: 140 }}>Budget</TableCell>
-        <TableCell sx={{ width: 210 }}>Actions</TableCell>
-      </TableRow>
-    </TableHead>
-    <TableBody>
-      {formData.chains.map((ch, i) => {
-        // ...slots/budget calculation (unchanged)
-        const slots = calculateTotalSlots(ch.startDate, ch.endDate, ch.slotSchedule);
-        const budget = slots * ch.slotPrice * ch.locationCount;
-
-        return (
-          <TableRow key={i} sx={ch.disabled ? { opacity: 0.5 } : {}}>
-            <TableCell>{chains.find(c => c.id === ch.chainId)?.chainName || ch.chainId}</TableCell>
-            <TableCell>{ch.startDate}</TableCell>
-            <TableCell>{ch.endDate}</TableCell>
-            <TableCell>{ch.locationCount}</TableCell>
-            <TableCell>{ch.slotPrice}</TableCell>
-            <TableCell>
-              {ch.slotSchedule?.type === "uniform"
-                ? `Uniform: ${ch.slotSchedule.slots} slots/day`
-                : "Weekday-based"}
-            </TableCell>
-            <TableCell>{slots}</TableCell>
-            <TableCell>{budget.toLocaleString()} AMD</TableCell>
-            <TableCell>
-              <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ width: "100%" }}>
-                <Button size="small" variant="text" onClick={() => editChain(i)}>Edit</Button>
-                <Button size="small" variant="text" onClick={() => toggleDisable(i)} sx={{ mx: 0.5 }}>
-                  {ch.disabled ? "Enable" : "Disable"}
-                </Button>
-                <Button size="small" variant="text" color="error" onClick={() => removeChain(i)}>
-                  Remove
-                </Button>
-              </Stack>
-            </TableCell>
-          </TableRow>
-        );
-      })}
-    </TableBody>
-  </Table>
-</Box>
-
+          <Box sx={{ mb: 3, overflowX: 'auto' }}>
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+              Added Chains
+            </Typography>
+            <Table size="small" aria-label="added chains" sx={{ minWidth: 1100, width: "100%", tableLayout: "fixed" }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ width: 160 }}>Chain</TableCell>
+                  <TableCell sx={{ width: 120 }}>Start</TableCell>
+                  <TableCell sx={{ width: 120 }}>End</TableCell>
+                  <TableCell sx={{ width: 90 }}>Locations</TableCell>
+                  <TableCell sx={{ width: 100 }}>Slot Price</TableCell>
+                  <TableCell sx={{ width: 160, whiteSpace: "nowrap" }}>Schedule</TableCell>
+                  <TableCell sx={{ width: 110, whiteSpace: "nowrap" }}>Slots Total</TableCell>
+                  <TableCell sx={{ width: 140 }}>Budget</TableCell>
+                  <TableCell sx={{ width: 210 }}>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {formData.chains.map((ch, i) => {
+                  const slots = calculateTotalSlots(ch.startDate, ch.endDate, ch.slotSchedule);
+                  const budget = slots * ch.slotPrice * ch.locationCount;
+                  return (
+                    <TableRow key={i} sx={ch.disabled ? { opacity: 0.5 } : {}}>
+                      <TableCell>{chains.find(c => c.id === ch.chainId)?.chainName || ch.chainId}</TableCell>
+                      <TableCell>{ch.startDate}</TableCell>
+                      <TableCell>{ch.endDate}</TableCell>
+                      <TableCell>{ch.locationCount}</TableCell>
+                      <TableCell>{ch.slotPrice}</TableCell>
+                      <TableCell sx={{ minWidth: 160, whiteSpace: "nowrap" }}>
+                        {ch.slotSchedule?.type === "uniform"
+                          ? `Uniform: ${ch.slotSchedule.slots} slots/day`
+                          : "Weekday-based"}
+                      </TableCell>
+                      <TableCell sx={{ minWidth: 100, whiteSpace: "nowrap" }}>
+                        {slots}
+                      </TableCell>
+                      <TableCell>{budget.toLocaleString()} AMD</TableCell>
+                      <TableCell>
+                        <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ width: "100%" }}>
+                          <Button size="small" variant="text" onClick={() => editChain(i)}>Edit</Button>
+                          <Button size="small" variant="text" onClick={() => toggleDisable(i)} sx={{ mx: 0.5 }}>
+                            {ch.disabled ? "Enable" : "Disable"}
+                          </Button>
+                          <Button size="small" variant="text" color="error" onClick={() => removeChain(i)}>
+                            Remove
+                          </Button>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </Box>
         )}
 
         <Typography variant="h6" sx={{ mt: 3, mb: 3 }}>
@@ -516,9 +545,9 @@ export default function CampaignForm() {
         </Typography>
 
         <Stack direction="row" spacing={2}>
-            <Button type="submit" variant="contained">Save</Button>
-            <Button variant="outlined" onClick={() => navigate("/campaigns")}>Cancel</Button>
-          </Stack>
+          <Button type="submit" variant="contained">Save</Button>
+          <Button variant="outlined" onClick={() => navigate("/campaigns")}>Cancel</Button>
+        </Stack>
       </Box>
     </PageWrapper>
   );

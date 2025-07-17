@@ -24,6 +24,10 @@ export default function ChainEdit() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (parseFloat(formData.share) <= 0) {
+      alert("Share must be a positive number");
+      return;
+    }
     await updateDoc(doc(db, "chains", id), {
       chainName: formData.chainName,
       share: formData.share,
@@ -47,6 +51,7 @@ export default function ChainEdit() {
             label="Share (%)"
             size="small"
             type="number"
+            inputProps={{ min: 0 }}
             value={formData.share}
             onChange={(e) => setFormData({ ...formData, share: e.target.value })}
             required

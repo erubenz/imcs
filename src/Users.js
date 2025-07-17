@@ -48,7 +48,7 @@ export default function Users() {
     <PageWrapper type="wide">
       <SectionTitle>Users & Roles</SectionTitle>
       <Box sx={{ width: '100%', overflowX: "auto" }}>
-        <Table size="small" sx={{ minWidth: 700 }}>
+        <Table size="small" aria-label="users table" sx={{ minWidth: 700 }}>
           <TableHead>
             <TableRow>
               <TableCell sx={tableCellSx}>Email</TableCell>

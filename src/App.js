@@ -13,6 +13,7 @@ import Clients from "./Clients";
 import ClientEdit from "./ClientEdit";
 import Login from "./Login";
 import CampaignDetail from "./CampaignDetail";
+import NotFound from "./NotFound";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
     <Route path="clients/:id/edit" element={<ClientEdit />} />
     <Route path="login" element={<Login />} />
   </Route>
+  <Route path="*" element={<NotFound />} />
 </Routes>
 
   );
