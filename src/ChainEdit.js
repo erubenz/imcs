@@ -9,7 +9,7 @@ import SectionTitle from "./components/common/SectionTitle";
 export default function ChainEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ chainName: "", share: "" });
+  const [formData, setFormData] = useState({ chainName: "", share: "", color: "#1976d2" });
   const [shareError, setShareError] = useState("");
   const [submitError, setSubmitError] = useState("");
 
@@ -18,7 +18,11 @@ export default function ChainEdit() {
       const snap = await getDoc(doc(db, "chains", id));
       if (snap.exists()) {
         const data = snap.data();
-        setFormData({ chainName: data.chainName || "", share: data.share || "" });
+        setFormData({
+          chainName: data.chainName || "",
+          share: data.share || "",
+          color: data.color || "#1976d2",
+        });
       }
     };
     load();
@@ -37,6 +41,7 @@ export default function ChainEdit() {
       await updateDoc(doc(db, "chains", id), {
         chainName: formData.chainName,
         share: shareNum,
+        color: formData.color,
       });
       navigate("/inventory/chains");
     } catch (err) {
@@ -65,11 +70,19 @@ export default function ChainEdit() {
             onChange={(e) => setFormData({ ...formData, share: e.target.value })}
             required
             error={!!shareError}
-            helperText={shareError}
-          />
-          {submitError && (
-            <Typography color="error">{submitError}</Typography>
-          )}
+          helperText={shareError}
+        />
+        <TextField
+          label="Color"
+          type="color"
+          size="small"
+          value={formData.color}
+          onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+          sx={{ width: 70 }}
+        />
+        {submitError && (
+          <Typography color="error">{submitError}</Typography>
+        )}
           <Stack direction="row" spacing={2}>
             <Button type="submit" variant="contained">Save</Button>
             <Button variant="outlined" onClick={() => navigate("/inventory/chains")}>Cancel</Button>

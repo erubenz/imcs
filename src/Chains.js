@@ -22,7 +22,7 @@ import { tableCellSx } from "./components/common/tableStyles";
 
 export default function Chains() {
   const [chains, setChains] = useState([]);
-  const [newChain, setNewChain] = useState({ chainName: "", share: "" });
+  const [newChain, setNewChain] = useState({ chainName: "", share: "", color: "#1976d2" });
   const [shareError, setShareError] = useState("");
   const [submitError, setSubmitError] = useState("");
   const navigate = useNavigate();
@@ -41,9 +41,10 @@ export default function Chains() {
       await setDoc(chainRef, {
         chainName: newChain.chainName,
         share: shareNum,
+        color: newChain.color,
       });
-      setChains(prev => [...prev, { id: chainRef.id, chainName: newChain.chainName, share: shareNum }]);
-      setNewChain({ chainName: "", share: "" });
+      setChains(prev => [...prev, { id: chainRef.id, chainName: newChain.chainName, share: shareNum, color: newChain.color }]);
+      setNewChain({ chainName: "", share: "", color: "#1976d2" });
     } catch (err) {
       setSubmitError("Failed to add chain.");
     }
@@ -86,6 +87,14 @@ export default function Chains() {
           error={!!shareError}
           helperText={shareError}
         />
+        <TextField
+          label="Color"
+          type="color"
+          size="small"
+          value={newChain.color}
+          onChange={e => setNewChain({ ...newChain, color: e.target.value })}
+          sx={{ width: 70 }}
+        />
         <Button
           variant="contained"
           onClick={handleAdd}
@@ -106,15 +115,19 @@ export default function Chains() {
               <TableCell sx={tableCellSx}>ID</TableCell>
               <TableCell sx={tableCellSx}>Name</TableCell>
               <TableCell sx={tableCellSx}>Share (%)</TableCell>
+              <TableCell sx={tableCellSx}>Color</TableCell>
               <TableCell sx={tableCellSx}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {chains.map((chain) => (
+              {chains.map((chain) => (
               <TableRow key={chain.id}>
                 <TableCell sx={tableCellSx}>{chain.id}</TableCell>
                 <TableCell sx={tableCellSx}>{chain.chainName}</TableCell>
                 <TableCell sx={tableCellSx}>{chain.share}</TableCell>
+                <TableCell sx={tableCellSx}>
+                  <Box sx={{ width: 20, height: 20, bgcolor: chain.color || "#1976d2", borderRadius: 0.5, border: '1px solid #ccc' }} />
+                </TableCell>
                 <TableCell sx={tableCellSx}>
                   <Stack direction="row" spacing={0}>
                     <IconButton size="small" onClick={() => navigate(`/inventory/chains/${chain.id}/edit`)}><Edit fontSize="small" /></IconButton>
