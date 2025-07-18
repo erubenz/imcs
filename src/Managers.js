@@ -12,7 +12,6 @@ import {
   TableCell,
   TableBody,
   Stack,
-  Typography,
   TextField,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";

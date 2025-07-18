@@ -9,8 +9,7 @@ import {
   TableHead,
   TableRow,
   TableCell,
-  TableBody,
-  Typography,
+  TableBody,  
 } from "@mui/material";
 import PageWrapper from "./components/common/PageWrapper";
 import SectionTitle from "./components/common/SectionTitle";

@@ -22,8 +22,6 @@ import { tableCellSx } from "./components/common/tableStyles";
 
 export default function CampaignList({ filteredBy }) {
   const [campaigns, setCampaigns] = useState([]);
-  const [clients, setClients] = useState({});
-  const [managers, setManagers] = useState({});
   const [chains, setChains] = useState({});
   const [viewMode, setViewMode] = useState("general");
   const navigate = useNavigate();
@@ -49,8 +47,6 @@ export default function CampaignList({ filteredBy }) {
       const chainMap = {};
       chSnap.forEach(doc => chainMap[doc.id] = doc.data().chainName);
 
-      setClients(clientsMap);
-      setManagers(managersMap);
       setChains(chainMap);
 
       let q = collection(db, "campaigns");
