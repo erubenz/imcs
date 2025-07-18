@@ -27,6 +27,8 @@ import {
   AccountTree,
   CalendarMonth,
   AccountCircle,
+  AdminPanelSettings,
+  Security,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
@@ -37,10 +39,11 @@ const drawerWidth = 240;
 export default function Layout() {
   const [open, setOpen] = useState(true);
   const [inventoryOpen, setInventoryOpen] = useState(false);
+  const [controlOpen, setControlOpen] = useState(false);
   const location = useLocation();
   
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, role } = useAuth();
 
   const handleLogout = async () => {
     await logout();
@@ -144,6 +147,29 @@ export default function Layout() {
             <ListItemIcon><CalendarMonth /></ListItemIcon>
             <ListItemText primary="Calendar" />
           </ListItemButton>
+
+          {user && role === "Admin" && (
+            <>
+              <ListItemButton onClick={() => setControlOpen(!controlOpen)}>
+                <ListItemIcon><AdminPanelSettings /></ListItemIcon>
+                <ListItemText primary="Control Panel" />
+                {controlOpen ? <ExpandLess /> : <ExpandMore />}
+              </ListItemButton>
+              <Collapse in={controlOpen} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  <ListItemButton
+                    component={Link}
+                    to="/control/access"
+                    selected={location.pathname === "/control/access"}
+                    sx={{ pl: 4 }}
+                  >
+                    <ListItemIcon><Security /></ListItemIcon>
+                    <ListItemText primary="Access Management" />
+                  </ListItemButton>
+                </List>
+              </Collapse>
+            </>
+          )}
 
           {!user && (
             <ListItemButton
