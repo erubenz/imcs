@@ -18,6 +18,7 @@ import NotFound from "./NotFound";
 import RequireRole from "./components/auth/RequireRole";
 import RequireAuth from "./components/auth/RequireAuth";
 import Profile from "./Profile";
+import AccessManagement from "./AccessManagement";
 
 function App() {
   return (
@@ -74,6 +75,14 @@ function App() {
           element={
             <RequireRole role="Admin">
               <Users />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="control/access"
+          element={
+            <RequireRole role="Admin">
+              <AccessManagement />
             </RequireRole>
           }
         />
