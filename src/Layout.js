@@ -63,8 +63,8 @@ export default function Layout() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap>
-            IMCS Admin Panel
+          <Typography variant="h6" component={Link} to="/" sx={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+            IMCS
           </Typography>
         </Toolbar>
       </AppBar>
