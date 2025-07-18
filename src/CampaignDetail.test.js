@@ -47,3 +47,28 @@ test('renders without crashing when createdAt is missing', async () => {
     expect(screen.getByText(/No Date/)).toBeInTheDocument();
   });
 });
+
+test('displays Updated field when updatedAt is provided', async () => {
+  const campaignData = {
+    campaignName: 'With Update',
+    status: 'active',
+    clientId: 'client1',
+    managerId: 'manager1',
+    createdAt: { toDate: () => new Date('2020-01-01') },
+    updatedAt: { toDate: () => new Date('2020-01-02') },
+    chains: [],
+  };
+
+  mockGetDoc
+    .mockResolvedValueOnce({ exists: () => true, data: () => campaignData })
+    .mockResolvedValueOnce({ exists: () => true, data: () => ({ name: 'C1' }) })
+    .mockResolvedValueOnce({ exists: () => true, data: () => ({ name: 'M1' }) });
+
+  mockGetDocs.mockResolvedValueOnce({ forEach: () => {} });
+
+  render(<CampaignDetail />);
+
+  await waitFor(() => {
+    expect(screen.getByText(/Updated:/)).toBeInTheDocument();
+  });
+});
