@@ -26,6 +26,7 @@ import {
   Person,
   AccountTree,
   CalendarMonth,
+  AccountCircle,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
@@ -152,6 +153,17 @@ export default function Layout() {
             >
               <ListItemIcon><Login /></ListItemIcon>
               <ListItemText primary="Login" />
+            </ListItemButton>
+          )}
+
+          {user && (
+            <ListItemButton
+              component={Link}
+              to="/profile"
+              selected={location.pathname === "/profile"}
+            >
+              <ListItemIcon><AccountCircle /></ListItemIcon>
+              <ListItemText primary="Profile" />
             </ListItemButton>
           )}
 

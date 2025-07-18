@@ -1,7 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
 import PlacementCalendar from './PlacementCalendar';
+
+jest.mock('react-router-dom', () => {
+  const React = require('react');
+  return {
+    MemoryRouter: ({ children }) => React.createElement('div', null, children),
+  };
+}, { virtual: true });
 
 const mockGetDocs = jest.fn();
 const mockCollection = jest.fn();
@@ -34,11 +40,7 @@ test('renders events from firestore', async () => {
     .mockResolvedValueOnce(makeSnap([['m1', { name: 'M' }]]))
     .mockResolvedValueOnce(makeSnap([['ch1', { chainName: 'Chain1' }]]));
 
-  render(
-    <MemoryRouter>
-      <PlacementCalendar />
-    </MemoryRouter>
-  );
+  render(<PlacementCalendar />);
 
   await waitFor(() => {
     expect(screen.getByText(/Camp1/)).toBeInTheDocument();
@@ -57,11 +59,7 @@ test('filters events by status', async () => {
     .mockResolvedValueOnce(makeSnap([['m1', { name: 'M' }]]))
     .mockResolvedValueOnce(makeSnap([['ch1', { chainName: 'Chain1' }]]));
 
-  render(
-    <MemoryRouter>
-      <PlacementCalendar />
-    </MemoryRouter>
-  );
+  render(<PlacementCalendar />);
 
   await waitFor(() => {
     expect(screen.getByText(/Camp1/)).toBeInTheDocument();
