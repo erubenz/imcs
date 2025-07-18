@@ -13,6 +13,7 @@ import Clients from "./Clients";
 import ClientEdit from "./ClientEdit";
 import Login from "./Login";
 import CampaignDetail from "./CampaignDetail";
+import PlacementCalendar from "./PlacementCalendar";
 import NotFound from "./NotFound";
 import RequireRole from "./components/auth/RequireRole";
 
@@ -31,6 +32,8 @@ function App() {
           <Route path="client/:clientId" element={<CampaignList filteredBy="client" />} />
           <Route path="manager/:managerId" element={<CampaignList filteredBy="manager" />} />
         </Route>
+
+        <Route path="calendar" element={<PlacementCalendar />} />
 
         <Route
           path="inventory/chains"

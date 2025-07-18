@@ -25,6 +25,7 @@ import {
   ManageAccounts,
   Person,
   AccountTree,
+  CalendarMonth,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
@@ -132,6 +133,15 @@ export default function Layout() {
           >
             <ListItemIcon><AccountTree /></ListItemIcon>
             <ListItemText primary="Campaigns" />
+          </ListItemButton>
+
+          <ListItemButton
+            component={Link}
+            to="/calendar"
+            selected={location.pathname === "/calendar"}
+          >
+            <ListItemIcon><CalendarMonth /></ListItemIcon>
+            <ListItemText primary="Calendar" />
           </ListItemButton>
 
           {!user && (
