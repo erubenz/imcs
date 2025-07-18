@@ -75,16 +75,20 @@ export default function Users() {
     const link = `${window.location.origin}/register/${token}`;
     console.log("Invite link for", email, link);
     const endpoint = process.env.REACT_APP_EMAIL_ENDPOINT;
-    if (endpoint) {
-      try {
-        await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ to: email, link, subject: "IMCS Invite" }),
-        });
-      } catch (e) {
-        console.error("Email send failed", e);
-      }
+    if (!endpoint) {
+      alert("Email service not configured");
+      return;
+    }
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to: email, link, subject: "IMCS Invite" }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+    } catch (e) {
+      console.error("Email send failed", e);
+      alert("Failed to send email");
     }
   };
 
