@@ -1,6 +1,12 @@
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import RequireRole from './components/auth/RequireRole';
+
+jest.mock('react-router-dom', () => {
+  const React = require('react');
+  return {
+    MemoryRouter: ({ children }) => React.createElement('div', null, children),
+  };
+}, { virtual: true });
 
 jest.mock('./context/AuthContext', () => ({
   useAuth: jest.fn(),
@@ -8,8 +14,7 @@ jest.mock('./context/AuthContext', () => ({
 
 const { useAuth } = require('./context/AuthContext');
 
-const renderWithRouter = (ui) =>
-  render(<MemoryRouter>{ui}</MemoryRouter>);
+const renderWithRouter = (ui) => render(ui);
 
 beforeEach(() => {
   jest.clearAllMocks();

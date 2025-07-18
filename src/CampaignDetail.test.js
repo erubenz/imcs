@@ -3,7 +3,7 @@ import CampaignDetail from './CampaignDetail';
 
 jest.mock('react-router-dom', () => ({
   useParams: () => ({ id: '1' }),
-}));
+}), { virtual: true });
 
 const mockDoc = jest.fn(() => ({}));
 const mockGetDoc = jest.fn();

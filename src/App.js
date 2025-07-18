@@ -16,12 +16,14 @@ import CampaignDetail from "./CampaignDetail";
 import PlacementCalendar from "./PlacementCalendar";
 import NotFound from "./NotFound";
 import RequireRole from "./components/auth/RequireRole";
+import RequireAuth from "./components/auth/RequireAuth";
+import Profile from "./Profile";
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/" element={<Layout />}>
+      <Route path="/" element={<RequireAuth><Layout /></RequireAuth>}>
         <Route index element={<Navigate to="/campaigns" />} />
 
         <Route path="campaigns">
@@ -75,6 +77,7 @@ function App() {
             </RequireRole>
           }
         />
+        <Route path="profile" element={<Profile />} />
         <Route path="clients" element={<Clients />} />
         <Route path="clients/:id/edit" element={<ClientEdit />} />
       </Route>
