@@ -45,7 +45,12 @@ export default function PlacementCalendar() {
   const calendarRef = useRef(null);
 
   useEffect(() => {
-    if (calendarRef.current) {
+    if (
+      calendarRef.current &&
+      typeof calendarRef.current.getApi === 'function' &&
+      calendarRef.current.getApi() &&
+      typeof calendarRef.current.getApi().changeView === 'function'
+    ) {
       calendarRef.current.getApi().changeView(view);
     }
   }, [view]);
@@ -172,8 +177,8 @@ export default function PlacementCalendar() {
           </Select>
         </FormControl>
         <FormControl size="small" sx={{ minWidth: 140 }}>
-          <InputLabel>Status</InputLabel>
-          <Select label="Status" name="status" value={filters.status} onChange={handleFilterChange}>
+          <InputLabel id="status-label">Status</InputLabel>
+          <Select labelId="status-label" label="Status" name="status" value={filters.status} onChange={handleFilterChange}>
             <MenuItem value="">All</MenuItem>
             <MenuItem value="active">active</MenuItem>
             <MenuItem value="paused">paused</MenuItem>

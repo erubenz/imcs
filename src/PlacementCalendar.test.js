@@ -1,5 +1,17 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+jest.mock('@fullcalendar/react', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: React.forwardRef(({ events }, ref) => {
+      React.useImperativeHandle(ref, () => ({ getApi: () => ({ changeView: () => {} }) }));
+      return React.createElement('div', null, events.map(e => React.createElement('div', { key: e.id }, e.title)));
+    })
+  };
+});
+
 import PlacementCalendar from './PlacementCalendar';
 
 jest.mock('react-router-dom', () => {
@@ -66,7 +78,9 @@ test('filters events by status', async () => {
     expect(screen.getByText(/Camp2/)).toBeInTheDocument();
   });
 
-  userEvent.selectOptions(screen.getByLabelText('Status'), 'active');
+  const select = screen.getByLabelText('Status');
+  fireEvent.mouseDown(select);
+  userEvent.click(screen.getByRole('option', { name: 'active' }));
 
   expect(screen.getByText(/Camp1/)).toBeInTheDocument();
   expect(screen.queryByText(/Camp2/)).toBeNull();

@@ -5,6 +5,7 @@ jest.mock('react-router-dom', () => {
   const React = require('react');
   return {
     MemoryRouter: ({ children }) => React.createElement('div', null, children),
+    Navigate: ({ children }) => React.createElement('div', null, children),
   };
 }, { virtual: true });
 
