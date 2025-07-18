@@ -9,6 +9,8 @@ import Managers from "./Managers";
 import ChainEdit from "./ChainEdit";
 import ManagerEdit from "./ManagerEdit";
 import Users from "./Users";
+import UserEdit from "./UserEdit";
+import RegisterInvite from "./RegisterInvite";
 import Clients from "./Clients";
 import ClientEdit from "./ClientEdit";
 import Login from "./Login";
@@ -24,6 +26,7 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/register/:token" element={<RegisterInvite />} />
       <Route path="/" element={<RequireAuth><Layout /></RequireAuth>}>
         <Route index element={<Navigate to="/campaigns" />} />
 
@@ -75,6 +78,14 @@ function App() {
           element={
             <RequireRole role="Admin">
               <Users />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="inventory/users/:id/edit"
+          element={
+            <RequireRole role="Admin">
+              <UserEdit />
             </RequireRole>
           }
         />
