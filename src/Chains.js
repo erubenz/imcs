@@ -18,6 +18,7 @@ import {
 import { Edit, Delete } from "@mui/icons-material";
 import PageWrapper from "./components/common/PageWrapper";
 import SectionTitle from "./components/common/SectionTitle";
+import { tableCellSx } from "./components/common/tableStyles";
 
 export default function Chains() {
   const [chains, setChains] = useState([]);
@@ -63,15 +64,6 @@ export default function Chains() {
         setSubmitError("Failed to delete chain.");
       }
     }
-  };
-
-  const tableCellSx = {
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxWidth: 120,
-    fontSize: 13,
-    p: 1,
   };
 
   return (
