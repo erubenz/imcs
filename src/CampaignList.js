@@ -18,6 +18,7 @@ import { Edit, Delete } from "@mui/icons-material";
 import PageWrapper from "./components/common/PageWrapper";
 import SectionTitle from "./components/common/SectionTitle";
 import { calculateTotalSlots } from "./utils";
+import { tableCellSx } from "./components/common/tableStyles";
 
 export default function CampaignList({ filteredBy }) {
   const [campaigns, setCampaigns] = useState([]);
@@ -107,14 +108,6 @@ export default function CampaignList({ filteredBy }) {
     }
   };
 
-  const tableCellSx = {
-  whiteSpace: 'nowrap',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  maxWidth: 120,
-  fontSize: 13,
-  p: 1,
-};
 
 const renderGeneral = () => (
   <Box sx={{ width: '100%', overflowX: "auto" }}>

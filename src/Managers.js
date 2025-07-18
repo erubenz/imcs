@@ -18,6 +18,7 @@ import {
 import { Edit, Delete } from "@mui/icons-material";
 import PageWrapper from "./components/common/PageWrapper";
 import SectionTitle from "./components/common/SectionTitle";
+import { tableCellSx } from "./components/common/tableStyles";
 
 export default function Managers() {
   const [managers, setManagers] = useState([]);
@@ -54,15 +55,6 @@ export default function Managers() {
         alert("Failed to delete manager.");
       }
     }
-  };
-
-  const tableCellSx = {
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxWidth: 120,
-    fontSize: 13,
-    p: 1,
   };
 
   return (

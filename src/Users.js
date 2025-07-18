@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import PageWrapper from "./components/common/PageWrapper";
 import SectionTitle from "./components/common/SectionTitle";
+import { tableCellSx } from "./components/common/tableStyles";
 
 const ROLES = ["Admin", "Manager", "Account Manager", "Sales Manager", "Viewer"];
 
@@ -33,15 +34,6 @@ export default function Users() {
     } catch (err) {
       alert("Failed to update role.");
     }
-  };
-
-  const tableCellSx = {
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxWidth: 120,
-    fontSize: 13,
-    p: 1,
   };
 
   return (

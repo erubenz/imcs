@@ -17,6 +17,7 @@ import {
 import { Edit, Delete, AccountTree } from "@mui/icons-material";
 import PageWrapper from "./components/common/PageWrapper";
 import SectionTitle from "./components/common/SectionTitle";
+import { tableCellSx } from "./components/common/tableStyles";
 
 export default function Clients() {
   const [clients, setClients] = useState([]);
@@ -54,15 +55,6 @@ export default function Clients() {
         alert("Failed to delete client.");
       }
     }
-  };
-
-  const tableCellSx = {
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxWidth: 120,
-    fontSize: 13,
-    p: 1,
   };
 
   return (
