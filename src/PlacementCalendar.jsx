@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -18,6 +18,8 @@ import {
   FormControl,
   InputLabel,
   Stack,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import PageWrapper from "./components/common/PageWrapper";
 import SectionTitle from "./components/common/SectionTitle";
@@ -39,6 +41,14 @@ export default function PlacementCalendar() {
     chains: {},
   });
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [view, setView] = useState("dayGridMonth");
+  const calendarRef = useRef(null);
+
+  useEffect(() => {
+    if (calendarRef.current) {
+      calendarRef.current.getApi().changeView(view);
+    }
+  }, [view]);
 
   useEffect(() => {
     const load = async () => {
@@ -56,26 +66,26 @@ export default function PlacementCalendar() {
         managers[d.id] = `${m.name} ${m.lastName || ""}`.trim();
       });
       const chains = {};
-      chainSnap.forEach((d) => (chains[d.id] = d.data().chainName));
+      chainSnap.forEach((d) => {
+        const ch = d.data();
+        chains[d.id] = { name: ch.chainName, color: ch.color || "#1976d2" };
+      });
       const campaigns = {};
       const evts = [];
-      const colors = ["#1976d2", "#9c27b0", "#e91e63", "#ff9800", "#009688"]; // simple palette
-      let colorIdx = 0;
       campaignSnap.forEach((doc) => {
         const data = doc.data();
         campaigns[doc.id] = data.campaignName;
-        const color = colors[colorIdx % colors.length];
-        colorIdx += 1;
         (data.chains || []).forEach((ch, i) => {
           evts.push({
             id: `${doc.id}-${i}`,
             title: data.campaignName,
             start: ch.startDate,
             end: new Date(new Date(ch.endDate).getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-            backgroundColor: color,
+            backgroundColor: chains[ch.chainId]?.color || "#1976d2",
             extendedProps: {
               campaignId: doc.id,
               chainId: ch.chainId,
+              locationCount: ch.locationCount,
               clientId: data.clientId,
               managerId: data.managerId,
               status: data.status,
@@ -108,6 +118,17 @@ export default function PlacementCalendar() {
   return (
     <PageWrapper type="wide">
       <SectionTitle>Placement Calendar</SectionTitle>
+      <ToggleButtonGroup
+        value={view}
+        exclusive
+        onChange={(e, v) => v && setView(v)}
+        size="small"
+        sx={{ mb: 2 }}
+      >
+        <ToggleButton value="timeGridDay">Day</ToggleButton>
+        <ToggleButton value="timeGridWeek">Week</ToggleButton>
+        <ToggleButton value="dayGridMonth">Month</ToggleButton>
+      </ToggleButtonGroup>
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
         <FormControl size="small" sx={{ minWidth: 140 }}>
           <InputLabel>Client</InputLabel>
@@ -145,8 +166,8 @@ export default function PlacementCalendar() {
           <InputLabel>Chain</InputLabel>
           <Select label="Chain" name="chain" value={filters.chain} onChange={handleFilterChange}>
             <MenuItem value="">All</MenuItem>
-            {Object.entries(maps.chains).map(([id, name]) => (
-              <MenuItem key={id} value={id}>{name}</MenuItem>
+            {Object.entries(maps.chains).map(([id, data]) => (
+              <MenuItem key={id} value={id}>{data.name}</MenuItem>
             ))}
           </Select>
         </FormControl>
@@ -161,8 +182,9 @@ export default function PlacementCalendar() {
         </FormControl>
       </Stack>
       <FullCalendar
+        ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
+        initialView={view}
         height="auto"
         events={filtered}
         eventClick={(info) => setSelectedEvent(info.event)}
@@ -173,7 +195,8 @@ export default function PlacementCalendar() {
           {selectedEvent && (
             <Box>
               <Typography><b>Campaign:</b> {maps.campaigns[selectedEvent.extendedProps.campaignId]}</Typography>
-              <Typography><b>Chain:</b> {maps.chains[selectedEvent.extendedProps.chainId]}</Typography>
+              <Typography><b>Chain:</b> {maps.chains[selectedEvent.extendedProps.chainId]?.name}</Typography>
+              <Typography><b>Locations:</b> {selectedEvent.extendedProps.locationCount}</Typography>
               <Typography><b>Status:</b> {selectedEvent.extendedProps.status}</Typography>
               <Typography><b>Start:</b> {selectedEvent.extendedProps.start}</Typography>
               <Typography><b>End:</b> {selectedEvent.extendedProps.end}</Typography>
