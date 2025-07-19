@@ -29,6 +29,7 @@ import {
   AccountCircle,
   AdminPanelSettings,
   Security,
+  Email,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
@@ -165,6 +166,15 @@ export default function Layout() {
                   >
                     <ListItemIcon><Security /></ListItemIcon>
                     <ListItemText primary="Access Management" />
+                  </ListItemButton>
+                  <ListItemButton
+                    component={Link}
+                    to="/control/mailing"
+                    selected={location.pathname === "/control/mailing"}
+                    sx={{ pl: 4 }}
+                  >
+                    <ListItemIcon><Email /></ListItemIcon>
+                    <ListItemText primary="Mailing Configuration" />
                   </ListItemButton>
                 </List>
               </Collapse>

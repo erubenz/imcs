@@ -3,16 +3,21 @@ import admin from 'firebase-admin';
 import nodemailer from 'nodemailer';
 
 admin.initializeApp();
+const db = admin.firestore();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || '587', 10),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+async function createTransporter() {
+  const snap = await db.doc('config/mailing').get();
+  const cfg = snap.exists ? snap.data() : {};
+  return nodemailer.createTransport({
+    host: cfg.smtpHost || process.env.SMTP_HOST,
+    port: parseInt(cfg.smtpPort || process.env.SMTP_PORT || '587', 10),
+    secure: false,
+    auth: {
+      user: cfg.smtpUser || process.env.SMTP_USER,
+      pass: cfg.smtpPass || process.env.SMTP_PASS,
+    },
+  });
+}
 
 export const sendInviteEmail = functions.https.onRequest(async (req, res) => {
   if (req.method !== 'POST') {
@@ -25,8 +30,11 @@ export const sendInviteEmail = functions.https.onRequest(async (req, res) => {
     return;
   }
   try {
+    const transporter = await createTransporter();
+    const snap = await db.doc('config/mailing').get();
+    const cfg = snap.exists ? snap.data() : {};
     await transporter.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      from: cfg.smtpFrom || process.env.SMTP_FROM || cfg.smtpUser || process.env.SMTP_USER,
       to,
       subject: subject || 'Invite',
       text: `Please complete your registration: ${link}`,
