@@ -80,29 +80,5 @@ REACT_APP_FIREBASE_PROJECT_ID=<your_firebase_project_id>
 REACT_APP_FIREBASE_STORAGE_BUCKET=<your_firebase_storage_bucket>
 REACT_APP_FIREBASE_MESSAGING_SENDER_ID=<your_firebase_messaging_sender_id>
 REACT_APP_FIREBASE_APP_ID=<your_firebase_app_id>
-REACT_APP_EMAIL_ENDPOINT=<cloud_function_url>
-
-# Email SMTP credentials for the function
-SMTP_HOST=<smtp_host>
-SMTP_PORT=<smtp_port>
-SMTP_USER=<smtp_user>
-SMTP_PASS=<smtp_password>
-SMTP_FROM=<from_email_optional>
-```
-
-The mailing configuration document in Firestore can also include a `subject`
-field which sets the default subject line for invite emails. This value can be
-edited from the **Mailing Configuration** screen in the application.
-
-These values are used by `src/firebase.js` to configure Firebase.
-The `REACT_APP_EMAIL_ENDPOINT` should point to the deployed cloud function
-`sendInviteEmail`. The SMTP variables are required when deploying the function
-so it can relay emails using your mail server.
-
-### Deploying Cloud Functions
-
-Run `npm install` inside the `functions` folder and then deploy the function:
-
-```bash
-firebase deploy --only functions
+REACT_APP_EMAIL_ENDPOINT=<email_service_url>
 ```

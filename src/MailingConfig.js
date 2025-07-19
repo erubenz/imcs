@@ -7,15 +7,7 @@ import SectionTitle from "./components/common/SectionTitle";
 import { db } from "./firebase";
 
 export default function MailingConfig() {
-  const [formData, setFormData] = useState({
-    endpoint: "",
-    smtpHost: "",
-    smtpPort: "",
-    smtpUser: "",
-    smtpPass: "",
-    smtpFrom: "",
-    subject: "",
-  });
+  const [endpoint, setEndpoint] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,7 +15,8 @@ export default function MailingConfig() {
       try {
         const snap = await getDoc(doc(db, "config", "mailing"));
         if (snap.exists()) {
-          setFormData((prev) => ({ ...prev, ...snap.data() }));
+          const data = snap.data();
+          if (data.endpoint) setEndpoint(data.endpoint);
         }
       } catch (err) {
         console.error("Failed to load mailing config", err);
@@ -35,7 +28,7 @@ export default function MailingConfig() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await setDoc(doc(db, "config", "mailing"), formData, { merge: true });
+      await setDoc(doc(db, "config", "mailing"), { endpoint }, { merge: true });
       alert("Configuration saved");
     } catch (err) {
       alert("Failed to save configuration");
@@ -50,47 +43,8 @@ export default function MailingConfig() {
           <TextField
             label="Email Endpoint"
             size="small"
-            value={formData.endpoint}
-            onChange={(e) => setFormData({ ...formData, endpoint: e.target.value })}
-          />
-          <TextField
-            label="SMTP Host"
-            size="small"
-            value={formData.smtpHost}
-            onChange={(e) => setFormData({ ...formData, smtpHost: e.target.value })}
-          />
-          <TextField
-            label="SMTP Port"
-            size="small"
-            value={formData.smtpPort}
-            onChange={(e) => setFormData({ ...formData, smtpPort: e.target.value })}
-          />
-          <TextField
-            label="SMTP User"
-            size="small"
-            value={formData.smtpUser}
-            onChange={(e) => setFormData({ ...formData, smtpUser: e.target.value })}
-            inputProps={{ autoComplete: "off" }}
-          />
-          <TextField
-            label="SMTP Password"
-            size="small"
-            type="password"
-            value={formData.smtpPass}
-            onChange={(e) => setFormData({ ...formData, smtpPass: e.target.value })}
-            inputProps={{ autoComplete: "new-password" }}
-          />
-          <TextField
-            label="From Email"
-            size="small"
-            value={formData.smtpFrom}
-            onChange={(e) => setFormData({ ...formData, smtpFrom: e.target.value })}
-          />
-          <TextField
-            label="Email Subject"
-            size="small"
-            value={formData.subject}
-            onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+            value={endpoint}
+            onChange={(e) => setEndpoint(e.target.value)}
           />
           <Stack direction="row" spacing={2}>
             <Button type="submit" variant="contained">Save</Button>
