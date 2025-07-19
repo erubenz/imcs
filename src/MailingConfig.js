@@ -14,6 +14,7 @@ export default function MailingConfig() {
     smtpUser: "",
     smtpPass: "",
     smtpFrom: "",
+    subject: "",
   });
   const navigate = useNavigate();
 
@@ -69,6 +70,7 @@ export default function MailingConfig() {
             size="small"
             value={formData.smtpUser}
             onChange={(e) => setFormData({ ...formData, smtpUser: e.target.value })}
+            inputProps={{ autoComplete: "off" }}
           />
           <TextField
             label="SMTP Password"
@@ -76,12 +78,19 @@ export default function MailingConfig() {
             type="password"
             value={formData.smtpPass}
             onChange={(e) => setFormData({ ...formData, smtpPass: e.target.value })}
+            inputProps={{ autoComplete: "new-password" }}
           />
           <TextField
             label="From Email"
             size="small"
             value={formData.smtpFrom}
             onChange={(e) => setFormData({ ...formData, smtpFrom: e.target.value })}
+          />
+          <TextField
+            label="Email Subject"
+            size="small"
+            value={formData.subject}
+            onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
           />
           <Stack direction="row" spacing={2}>
             <Button type="submit" variant="contained">Save</Button>
