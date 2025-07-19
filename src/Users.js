@@ -76,9 +76,14 @@ export default function Users() {
     const link = `${window.location.origin}/register/${token}`;
     console.log("Invite link for", email, link);
     let endpoint = process.env.REACT_APP_EMAIL_ENDPOINT;
+    let subject = "IMCS Invite";
     try {
       const snap = await getDoc(doc(db, "config", "mailing"));
-      endpoint = snap.exists() ? snap.data().endpoint || endpoint : endpoint;
+      if (snap.exists()) {
+        const data = snap.data();
+        endpoint = data.endpoint || endpoint;
+        subject = data.subject || subject;
+      }
     } catch (err) {
       console.error("Failed to load email config", err);
     }
@@ -90,7 +95,7 @@ export default function Users() {
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ to: email, link, subject: "IMCS Invite" }),
+        body: JSON.stringify({ to: email, link, subject }),
       });
       if (!res.ok) throw new Error(await res.text());
     } catch (e) {

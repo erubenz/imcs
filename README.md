@@ -90,6 +90,10 @@ SMTP_PASS=<smtp_password>
 SMTP_FROM=<from_email_optional>
 ```
 
+The mailing configuration document in Firestore can also include a `subject`
+field which sets the default subject line for invite emails. This value can be
+edited from the **Mailing Configuration** screen in the application.
+
 These values are used by `src/firebase.js` to configure Firebase.
 The `REACT_APP_EMAIL_ENDPOINT` should point to the deployed cloud function
 `sendInviteEmail`. The SMTP variables are required when deploying the function

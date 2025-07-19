@@ -36,7 +36,7 @@ export const sendInviteEmail = functions.https.onRequest(async (req, res) => {
     await transporter.sendMail({
       from: cfg.smtpFrom || process.env.SMTP_FROM || cfg.smtpUser || process.env.SMTP_USER,
       to,
-      subject: subject || 'Invite',
+      subject: subject || cfg.subject || 'Invite',
       text: `Please complete your registration: ${link}`,
     });
     res.status(200).send('sent');

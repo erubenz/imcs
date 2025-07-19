@@ -35,7 +35,9 @@ export default function AccessManagement() {
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "permissions"), (snapshot) => {
       const data = {};
+      const existing = new Set();
       snapshot.forEach((docSnap) => {
+        existing.add(docSnap.id);
         const raw = docSnap.data();
         const entry = {};
         let needsFix = false;
@@ -58,6 +60,20 @@ export default function AccessManagement() {
           );
         }
         data[docSnap.id] = entry;
+      });
+      FUNCTIONS.forEach((f) => {
+        if (!existing.has(f.id)) {
+          const entry = {};
+          ROLES.forEach((r) => {
+            entry[r] = { read: r === "Admin", write: r === "Admin" };
+          });
+          data[f.id] = entry;
+          setDoc(
+            doc(db, "permissions", f.id),
+            { Admin: { read: true, write: true } },
+            { merge: true }
+          );
+        }
       });
       setPermissions(data);
     });
