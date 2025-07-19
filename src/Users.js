@@ -82,7 +82,6 @@ export default function Users() {
       if (snap.exists()) {
         const data = snap.data();
         endpoint = data.endpoint || endpoint;
-        subject = data.subject || subject;
       }
     } catch (err) {
       console.error("Failed to load email config", err);
