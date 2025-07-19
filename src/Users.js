@@ -7,6 +7,7 @@ import {
   updateDoc,
   setDoc,
   deleteDoc,
+  getDoc,
   serverTimestamp,
 } from "firebase/firestore";
 import {
@@ -74,7 +75,13 @@ export default function Users() {
   const sendInviteEmail = async (email, token) => {
     const link = `${window.location.origin}/register/${token}`;
     console.log("Invite link for", email, link);
-    const endpoint = process.env.REACT_APP_EMAIL_ENDPOINT;
+    let endpoint = process.env.REACT_APP_EMAIL_ENDPOINT;
+    try {
+      const snap = await getDoc(doc(db, "config", "mailing"));
+      endpoint = snap.exists() ? snap.data().endpoint || endpoint : endpoint;
+    } catch (err) {
+      console.error("Failed to load email config", err);
+    }
     if (!endpoint) {
       alert("Email service not configured");
       return;
@@ -113,6 +120,16 @@ export default function Users() {
 
   const handleResend = async (invite) => {
     await sendInviteEmail(invite.email, invite.id);
+  };
+
+  const handleCancelInvite = async (id) => {
+    if (window.confirm("Cancel this invite?")) {
+      try {
+        await deleteDoc(doc(db, "invites", id));
+      } catch (err) {
+        alert("Failed to cancel invite.");
+      }
+    }
   };
 
   const handleDelete = async (id) => {
@@ -170,9 +187,14 @@ export default function Users() {
                   <TableCell sx={tableCellSx}>{inv.name}</TableCell>
                   <TableCell sx={tableCellSx}>{inv.lastName}</TableCell>
                   <TableCell sx={tableCellSx}>
-                    <IconButton size="small" onClick={() => handleResend(inv)}>
-                      <Send fontSize="small" />
-                    </IconButton>
+                    <Stack direction="row" spacing={0}>
+                      <IconButton size="small" onClick={() => handleResend(inv)}>
+                        <Send fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" onClick={() => handleCancelInvite(inv.id)}>
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Stack>
                   </TableCell>
                 </TableRow>
               ))}

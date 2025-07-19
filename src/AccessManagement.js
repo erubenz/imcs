@@ -25,6 +25,7 @@ const FUNCTIONS = [
   { id: "campaigns", label: "Campaigns" },
   { id: "calendar", label: "Calendar" },
   { id: "users", label: "Users & Roles" },
+  { id: "control", label: "Control Panel" },
 ];
 
 export default function AccessManagement() {

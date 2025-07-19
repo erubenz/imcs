@@ -21,6 +21,7 @@ import RequireRole from "./components/auth/RequireRole";
 import RequireAuth from "./components/auth/RequireAuth";
 import Profile from "./Profile";
 import AccessManagement from "./AccessManagement";
+import MailingConfig from "./MailingConfig";
 
 function App() {
   return (
@@ -94,6 +95,14 @@ function App() {
           element={
             <RequireRole role="Admin">
               <AccessManagement />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="control/mailing"
+          element={
+            <RequireRole role="Admin">
+              <MailingConfig />
             </RequireRole>
           }
         />
